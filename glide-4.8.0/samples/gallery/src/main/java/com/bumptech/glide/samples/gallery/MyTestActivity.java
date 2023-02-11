@@ -12,6 +12,8 @@ public class MyTestActivity extends Activity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.my_test_activity);
 
+
+
     ImageView iv = findViewById(R.id.iv);
     Glide.with(this)
         .load("http://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png")
