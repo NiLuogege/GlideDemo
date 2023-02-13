@@ -163,6 +163,7 @@ public class RequestManagerFragment extends Fragment {
     unregisterFragmentWithRoot();
     rootRequestManagerFragment =
         Glide.get(activity).getRequestManagerRetriever().getRequestManagerFragment(activity);
+    //这里应该是处理fragment嵌套问题
     if (!equals(rootRequestManagerFragment)) {
       rootRequestManagerFragment.addChildRequestManagerFragment(this);
     }
@@ -171,8 +172,7 @@ public class RequestManagerFragment extends Fragment {
   private void unregisterFragmentWithRoot() {
     if (rootRequestManagerFragment != null) {
       rootRequestManagerFragment.removeChildRequestManagerFragment(this);
-      rootRequestManagerFragment = null;
-    }
+      rootRequestManagerFragment = null;}
   }
 
   @SuppressWarnings("deprecation")

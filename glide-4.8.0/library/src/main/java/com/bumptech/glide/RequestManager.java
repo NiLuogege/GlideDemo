@@ -46,6 +46,9 @@ import java.net.URL;
  * @see Glide#with(android.app.Fragment)
  * @see Glide#with(android.support.v4.app.Fragment)
  * @see Glide#with(Context)
+ *
+ *
+ * 一个加载图片的列
  */
 public class RequestManager implements LifecycleListener,
     ModelTypes<RequestBuilder<Drawable>> {

@@ -61,8 +61,7 @@ public class RequestManagerRetriever implements Handler.Callback {
   /**
    * Pending adds for SupportRequestManagerFragments.
    */
-  @VisibleForTesting
-  final Map<FragmentManager, SupportRequestManagerFragment> pendingSupportRequestManagerFragments =
+  @VisibleForTesting final Map<FragmentManager, SupportRequestManagerFragment> pendingSupportRequestManagerFragments =
       new HashMap<>();
 
   /**
@@ -139,7 +138,7 @@ public class RequestManagerRetriever implements Handler.Callback {
   @NonNull
   public RequestManager get(@NonNull Fragment fragment) {
     Preconditions.checkNotNull(fragment.getActivity(),
-          "You cannot start a load on a fragment before it is attached or after it is destroyed");
+        "You cannot start a load on a fragment before it is attached or after it is destroyed");
     if (Util.isOnBackgroundThread()) {
       return get(fragment.getActivity().getApplicationContext());
     } else {
