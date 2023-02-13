@@ -31,6 +31,10 @@ import java.util.List;
  * {@link Target}.
  *
  * @param <R> The type of the resource that will be transcoded from the loaded resource.
+ *
+ * 默认的 Request
+ *
+ * 开始请求是在他的 begin 方法中
  */
 public final class SingleRequest<R> implements Request,
     SizeReadyCallback,
@@ -227,6 +231,7 @@ public final class SingleRequest<R> implements Request,
       }
       // Only log at more verbose log levels if the user has set a fallback drawable, because
       // fallback Drawables indicate the user expects null models occasionally.
+      // 加载失败 会显示 加载失败图片
       int logLevel = getFallbackDrawable() == null ? Log.WARN : Log.DEBUG;
       onLoadFailed(new GlideException("Received null model"), logLevel);
       return;
@@ -242,6 +247,7 @@ public final class SingleRequest<R> implements Request,
     // new load etc. This does mean that users who want to restart a load because they expect that
     // the view size has changed will need to explicitly clear the View or Target before starting
     // the new load.
+    // 已经加载好了，不是主流程
     if (status == Status.COMPLETE) {
       onResourceReady(resource, DataSource.MEMORY_CACHE);
       return;
@@ -250,10 +256,13 @@ public final class SingleRequest<R> implements Request,
     // Restarts for requests that are neither complete nor running can be treated as new requests
     // and can run again from the beginning.
 
+    //开始对图片 尺寸做处理 ，最终都会走到 onSizeReady
     status = Status.WAITING_FOR_SIZE;
+    //如果用户设置了 固定尺寸
     if (Util.isValidDimensions(overrideWidth, overrideHeight)) {
       onSizeReady(overrideWidth, overrideHeight);
     } else {
+      //自己取获取尺寸
       target.getSize(this);
     }
 
@@ -429,6 +438,8 @@ public final class SingleRequest<R> implements Request,
     if (IS_VERBOSE_LOGGABLE) {
       logV("finished setup for calling load in " + LogTime.getElapsedMillis(startTime));
     }
+
+    //开始执行加载
     loadStatus = engine.load(
         glideContext,
         model,

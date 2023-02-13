@@ -19,6 +19,8 @@ import okhttp3.ResponseBody;
 
 /**
  * Fetches an {@link InputStream} using the okhttp library.
+ * 
+ * 通过 okhttp加载图片
  */
 public class OkHttpStreamFetcher implements DataFetcher<InputStream>, okhttp3.Callback {
   private static final String TAG = "OkHttpFetcher";

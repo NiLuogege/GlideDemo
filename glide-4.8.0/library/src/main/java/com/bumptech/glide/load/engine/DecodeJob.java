@@ -279,6 +279,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     }
   }
 
+  //获取解码的数据源，是缓存 还是 网络
   private DataFetcherGenerator getNextGenerator() {
     switch (stage) {
       case RESOURCE_CACHE:
@@ -286,6 +287,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       case DATA_CACHE:
         return new DataCacheGenerator(decodeHelper, this);
       case SOURCE:
+        //这里是走网络
         return new SourceGenerator(decodeHelper, this);
       case FINISHED:
         return null;
@@ -407,6 +409,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     }
     Resource<R> resource = null;
     try {
+      //开始解码
       resource = decodeFromData(currentFetcher, currentData, currentDataSource);
     } catch (GlideException e) {
       e.setLoggingDetails(currentAttemptingKey, currentDataSource);
@@ -455,6 +458,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
         return null;
       }
       long startTime = LogTime.getLogTime();
+      //解码
       Resource<R> result = decodeFromFetcher(data, dataSource);
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         logWithTimeAndKey("Decoded result " + result, startTime);

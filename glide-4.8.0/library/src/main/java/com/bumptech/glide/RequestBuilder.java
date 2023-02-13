@@ -622,6 +622,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
     }
 
     options = options.autoClone();
+    //构建一个 Request
     Request request = buildRequest(target, targetListener, options);
 
     Request previous = target.getRequest();
@@ -643,6 +644,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
 
     requestManager.clear(target);
     target.setRequest(request);
+    //开始执行这个 request
     requestManager.track(target, request);
 
     return target;
@@ -977,6 +979,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
       }
 
       ThumbnailRequestCoordinator coordinator = new ThumbnailRequestCoordinator(parentCoordinator);
+      //获取一个 Request
       Request fullRequest =
           obtainRequest(
               target,

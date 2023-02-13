@@ -198,6 +198,7 @@ public class Engine implements EngineJobListener,
       return new LoadStatus(cb, current);
     }
 
+    //创建 EngineJob
     EngineJob<R> engineJob =
         engineJobFactory.build(
             key,
@@ -206,6 +207,7 @@ public class Engine implements EngineJobListener,
             useAnimationPool,
             onlyRetrieveFromCache);
 
+    //创建 DecodeJob
     DecodeJob<R> decodeJob =
         decodeJobFactory.build(
             glideContext,
@@ -228,6 +230,7 @@ public class Engine implements EngineJobListener,
     jobs.put(key, engineJob);
 
     engineJob.addCallback(cb);
+
     engineJob.start(decodeJob);
 
     if (VERBOSE_IS_LOGGABLE) {

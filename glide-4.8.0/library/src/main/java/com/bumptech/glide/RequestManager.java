@@ -614,6 +614,7 @@ public class RequestManager implements LifecycleListener,
 
   void track(@NonNull Target<?> target, @NonNull Request request) {
     targetTracker.track(target);
+    //开始执行这个 request
     requestTracker.runRequest(request);
   }
 
