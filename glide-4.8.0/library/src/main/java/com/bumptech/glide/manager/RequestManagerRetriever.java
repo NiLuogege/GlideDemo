@@ -409,6 +409,7 @@ public class RequestManagerRetriever implements Handler.Callback {
     if (requestManager == null) {
       Glide glide = Glide.get(context);
       //创建一个 RequestManager 并设置给 RequestManagerFragment
+      // factory 默认为  DEFAULT_FACTORY ，他会 new 一个 RequestManager 并返回
       requestManager =
           factory.build(
               glide, current.getGlideLifecycle(), current.getRequestManagerTreeNode(), context);

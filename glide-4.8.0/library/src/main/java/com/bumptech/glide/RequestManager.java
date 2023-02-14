@@ -357,6 +357,7 @@ public class RequestManager implements LifecycleListener,
   @NonNull
   @CheckResult
   public RequestBuilder<Drawable> asDrawable() {
+    //new并返回一个 RequestBuilder<Drawable>
     return as(Drawable.class);
   }
 
@@ -393,6 +394,8 @@ public class RequestManager implements LifecycleListener,
   @CheckResult
   @Override
   public RequestBuilder<Drawable> load(@Nullable String string) {
+    //asDrawable() 会返回一个 RequestBuilder
+    //最终调用 RequestBuilder的 load方法
     return asDrawable().load(string);
   }
 
@@ -523,11 +526,14 @@ public class RequestManager implements LifecycleListener,
    *
    * @param resourceClass The resource to decode.
    * @return A new request builder for loading the given resource class.
+   *
+   * asDrawable() 流程时  resourceClass 为 Class<Drawable>
    */
   @NonNull
   @CheckResult
   public <ResourceType> RequestBuilder<ResourceType> as(
       @NonNull Class<ResourceType> resourceClass) {
+    //创建 RequestBuilder 对象
     return new RequestBuilder<>(glide, this, resourceClass, context);
   }
 

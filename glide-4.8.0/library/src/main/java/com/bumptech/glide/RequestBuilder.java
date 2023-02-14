@@ -54,6 +54,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
 
   private final Context context;
   private final RequestManager requestManager;
+  //asDrawable() 流程时  transcodeClass 为 Class<Drawable>
   private final Class<TranscodeType> transcodeClass;
   private final RequestOptions defaultRequestOptions;
   private final Glide glide;
@@ -61,10 +62,12 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
 
   @NonNull protected RequestOptions requestOptions;
 
+  //默认的话为  GenericTransitionOptions
   @NonNull
   @SuppressWarnings("unchecked")
   private TransitionOptions<?, ? super TranscodeType> transitionOptions;
 
+  //在加载网络图片的时候就是 String 类型的 url
   @Nullable private Object model;
   // model may occasionally be null, so to enforce that load() was called, put a boolean rather
   // than relying on model not to be null.
@@ -77,12 +80,17 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
   private boolean isThumbnailBuilt;
 
   protected RequestBuilder(Glide glide, RequestManager requestManager,
-      Class<TranscodeType> transcodeClass, Context context) {
+      Class<TranscodeType> transcodeClass,//asDrawable() 流程时  transcodeClass 为 Drawable.class
+      Context context) {
     this.glide = glide;
     this.requestManager = requestManager;
+
     this.transcodeClass = transcodeClass;
+    //获取配置
     this.defaultRequestOptions = requestManager.getDefaultRequestOptions();
     this.context = context;
+    //通过 transcodeClass获取 转换配置
+    //默认的话为  GenericTransitionOptions
     this.transitionOptions = requestManager.getDefaultTransitionOptions(transcodeClass);
     this.requestOptions = defaultRequestOptions;
     this.glideContext = glide.getGlideContext();
@@ -356,7 +364,9 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
 
   @NonNull
   private RequestBuilder<TranscodeType> loadGeneric(@Nullable Object model) {
+    //设置model ，在加载网络图片的时候就是 String 类型的 url
     this.model = model;
+    //标识 model 是否已经设置
     isModelSet = true;
     return this;
   }
@@ -612,8 +622,8 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
   }
 
   private <Y extends Target<TranscodeType>> Y into(
-      @NonNull Y target,
-      @Nullable RequestListener<TranscodeType> targetListener,
+      @NonNull Y target,//asDrawable() 流程中 target 为 DrawableImageViewTarget
+      @Nullable RequestListener<TranscodeType> targetListener, // targetListener 一般为 null
       @NonNull RequestOptions options) {
     Util.assertMainThread();
     Preconditions.checkNotNull(target);
@@ -670,12 +680,15 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    * @param view The view to cancel previous loads for and load the new resource into.
    * @return The
    * {@link com.bumptech.glide.request.target.Target} used to wrap the given {@link ImageView}.
+   *
+   * 设置 图片加载的 目标可以是一个 ImageView 也可以是其他的比如
    */
   @NonNull
   public ViewTarget<ImageView, TranscodeType> into(@NonNull ImageView view) {
     Util.assertMainThread();
     Preconditions.checkNotNull(view);
 
+    //获取到 requestOptions
     RequestOptions requestOptions = this.requestOptions;
     if (!requestOptions.isTransformationSet()
         && requestOptions.isTransformationAllowed()
@@ -706,6 +719,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
     }
 
     return into(
+        //asDrawable() 流程中 返回的是 DrawableImageViewTarget
         glideContext.buildImageViewTarget(view, transcodeClass),
         /*targetListener=*/ null,
         requestOptions);
@@ -875,17 +889,17 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
   }
 
   private Request buildRequest(
-      Target<TranscodeType> target,
-      @Nullable RequestListener<TranscodeType> targetListener,
+      Target<TranscodeType> target,//asDrawable() 流程中 target 为 DrawableImageViewTarget
+      @Nullable RequestListener<TranscodeType> targetListener,// targetListener 一般为 null
       RequestOptions requestOptions) {
     return buildRequestRecursive(
         target,
         targetListener,
         /*parentCoordinator=*/ null,
-        transitionOptions,
-        requestOptions.getPriority(),
-        requestOptions.getOverrideWidth(),
-        requestOptions.getOverrideHeight(),
+        transitionOptions,//默认的话为  GenericTransitionOptions
+        requestOptions.getPriority(),//获取优先级
+        requestOptions.getOverrideWidth(),//获取图片宽度 没有设置的话为 -1
+        requestOptions.getOverrideHeight(),//获取图片高度 没有设置的话为 -1
         requestOptions);
   }
 

@@ -14,6 +14,7 @@ public class ImageViewTargetFactory {
   @SuppressWarnings("unchecked")
   public <Z> ViewTarget<ImageView, Z> buildTarget(@NonNull ImageView view,
       @NonNull Class<Z> clazz) {
+    //不同的class 对应不同的 ViewTarget
     if (Bitmap.class.equals(clazz)) {
       return (ViewTarget<ImageView, Z>) new BitmapImageViewTarget(view);
     } else if (Drawable.class.isAssignableFrom(clazz)) {

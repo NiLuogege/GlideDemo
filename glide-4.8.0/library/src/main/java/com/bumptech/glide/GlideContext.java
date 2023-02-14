@@ -57,6 +57,7 @@ public class GlideContext extends ContextWrapper {
     return defaultRequestOptions;
   }
 
+  //获取转换配置 默认的话为 DEFAULT_TRANSITION_OPTIONS 是 GenericTransitionOptions 类型
   @SuppressWarnings("unchecked")
   @NonNull
   public <T> TransitionOptions<?, T> getDefaultTransitionOptions(@NonNull Class<T> transcodeClass) {
@@ -74,9 +75,12 @@ public class GlideContext extends ContextWrapper {
     return (TransitionOptions<?, T>) result;
   }
 
+  //创建一个 ViewTarget
+  //asDrawable() 流程时  transcodeClass 为 Class<Drawable> 返回的是 DrawableImageViewTarget
   @NonNull
   public <X> ViewTarget<ImageView, X> buildImageViewTarget(
       @NonNull ImageView imageView, @NonNull Class<X> transcodeClass) {
+    // transcodeClass 为 Class<Drawable> 时会创建一个 DrawableImageViewTarget
     return imageViewTargetFactory.buildTarget(imageView, transcodeClass);
   }
 
