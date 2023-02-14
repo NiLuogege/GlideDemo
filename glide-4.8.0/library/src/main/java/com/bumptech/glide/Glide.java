@@ -720,6 +720,7 @@ public class Glide implements ComponentCallbacks2 {
         "You cannot start a load on a not yet attached View or a Fragment where getActivity() "
             + "returns null (which usually occurs when getActivity() is called before the Fragment "
             + "is attached or after the Fragment is destroyed).");
+    //如果Glide 没有初始化先回去初始化 Glide，会返回Glide初始化以后的 RequestManagerRetriever 对象
     return Glide.get(context).getRequestManagerRetriever();
   }
 
@@ -759,6 +760,8 @@ public class Glide implements ComponentCallbacks2 {
    */
   @NonNull
   public static RequestManager with(@NonNull Activity activity) {
+    //getRetriever(activity) 返回的是 RequestManagerRetriever
+    //RequestManagerRetriever.get 会返回一个 RequestManager
     return getRetriever(activity).get(activity);
   }
 

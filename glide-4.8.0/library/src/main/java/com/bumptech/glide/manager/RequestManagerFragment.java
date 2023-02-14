@@ -42,6 +42,7 @@ public class RequestManagerFragment extends Fragment {
   @Nullable private Fragment parentFragmentHint;
 
   public RequestManagerFragment() {
+    //创建一个 ActivityFragmentLifecycle
     this(new ActivityFragmentLifecycle());
   }
 

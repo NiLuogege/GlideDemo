@@ -54,6 +54,8 @@ public class RequestManagerRetriever implements Handler.Callback {
 
   /**
    * Pending adds for RequestManagerFragments.
+   *
+   * 保存了 FragmentManager 和 RequestManagerFragment 映射关系
    */
   @SuppressWarnings("deprecation")
   @VisibleForTesting
@@ -152,11 +154,14 @@ public class RequestManagerRetriever implements Handler.Callback {
   @SuppressWarnings("deprecation")
   @NonNull
   public RequestManager get(@NonNull Activity activity) {
+    //会切换到 主线程执行
     if (Util.isOnBackgroundThread()) {
       return get(activity.getApplicationContext());
     } else {
       assertNotDestroyed(activity);
+      //获取 FragmentManager
       android.app.FragmentManager fm = activity.getFragmentManager();
+
       return fragmentGet(
           activity, fm, /*parentHint=*/ null, isActivityVisible(activity));
     }
@@ -354,37 +359,54 @@ public class RequestManagerRetriever implements Handler.Callback {
   @NonNull
   private RequestManagerFragment getRequestManagerFragment(
       @NonNull final android.app.FragmentManager fm,
-      @Nullable android.app.Fragment parentHint,
-      boolean isParentVisible) {
+      @Nullable android.app.Fragment parentHint,//activity 中加载图片是为 null
+      boolean isParentVisible//一般为true
+  ) {
+    //先通过 FRAGMENT_TAG 获取 RequestManagerFragment，
     RequestManagerFragment current = (RequestManagerFragment) fm.findFragmentByTag(FRAGMENT_TAG);
     if (current == null) {
+      //从 pendingRequestManagerFragments 缓存中拿
       current = pendingRequestManagerFragments.get(fm);
+      //如果上面都没有找到，则会创建一个 RequestManagerFragment 设置tag为 FRAGMENT_TAG 并缓存到pendingRequestManagerFragments 中，
       if (current == null) {
         current = new RequestManagerFragment();
         current.setParentFragmentHint(parentHint);
+
+        //将生命周期设置为 onStart
         if (isParentVisible) {
           current.getGlideLifecycle().onStart();
         }
+        //缓存到pendingRequestManagerFragments 中，
         pendingRequestManagerFragments.put(fm, current);
+        // 设置tag为 FRAGMENT_TAG
         fm.beginTransaction().add(current, FRAGMENT_TAG).commitAllowingStateLoss();
+
+        //发送一个消息，这条消息会将 pendingRequestManagerFragments 中缓存的 RequestManagerFragment 给删掉
+        //这么刚加上有删除的操作 是为啥呢？ 不是上面已经有一个 通过Tag来获取 RequestManagerFragment 的 操作了么？
         handler.obtainMessage(ID_REMOVE_FRAGMENT_MANAGER, fm).sendToTarget();
       }
     }
     return current;
   }
 
+  /**
+   * 创建or获取一个 RequestManager 并返回
+   */
   @SuppressWarnings({"deprecation", "DeprecatedIsStillUsed"})
   @Deprecated
   @NonNull
   private RequestManager fragmentGet(@NonNull Context context,
       @NonNull android.app.FragmentManager fm,
-      @Nullable android.app.Fragment parentHint,
-      boolean isParentVisible) {
+      @Nullable android.app.Fragment parentHint,//activity 中加载图片是为 null
+      boolean isParentVisible//一般为true
+  ) {
+    //创建 or 获取 一个已经添加到 FragmentManager 中的 RequestManagerFragment
     RequestManagerFragment current = getRequestManagerFragment(fm, parentHint, isParentVisible);
+    //获取一个 RequestManager 一般情况下是获取不到的
     RequestManager requestManager = current.getRequestManager();
     if (requestManager == null) {
-      // TODO(b/27524013): Factor out this Glide.get() call.
       Glide glide = Glide.get(context);
+      //创建一个 RequestManager 并设置给 RequestManagerFragment
       requestManager =
           factory.build(
               glide, current.getGlideLifecycle(), current.getRequestManagerTreeNode(), context);
