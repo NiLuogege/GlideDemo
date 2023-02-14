@@ -33,6 +33,8 @@ import java.util.List;
 /**
  * Manages component registration to extend or replace Glide's default loading, decoding, and
  * encoding logic.
+ *
+ * 注册表，这里注册了 所有用于加载，编码，解码的 工具，一般可以通过一个key 或者 多个key获取指定的 类
  */
 // Public API.
 @SuppressWarnings({"WeakerAccess", "unused"})
@@ -43,11 +45,29 @@ public class Registry {
   private static final String BUCKET_PREPEND_ALL = "legacy_prepend_all";
   private static final String BUCKET_APPEND_ALL = "legacy_append";
 
+  /**
+   * 数据加载模块
+   */
   private final ModelLoaderRegistry modelLoaderRegistry;
+  /**
+   * 编码存储模块，提供将数据持久化存储到磁盘文件中的功能
+   */
   private final EncoderRegistry encoderRegistry;
+  /**
+   * 解码模块，能够将各种类型数据，例如文件、byte数组等数据解码成bitmap或者drawable等资源
+   */
   private final ResourceDecoderRegistry decoderRegistry;
+  /**
+   * 编码存储模块，提供将bitmap或者drawable等资源文件进行持久化存储的功能
+   */
   private final ResourceEncoderRegistry resourceEncoderRegistry;
+  /**
+   * 数据流重定向模块，例如重定向ByteBuffer中的position或者stream中的指针位置等
+   */
   private final DataRewinderRegistry dataRewinderRegistry;
+  /**
+   * 类型转换模块，提供将不同资源类型进行转换的能力，例如将bitmap转成drawable等
+   */
   private final TranscoderRegistry transcoderRegistry;
   private final ImageHeaderParserRegistry imageHeaderParserRegistry;
 

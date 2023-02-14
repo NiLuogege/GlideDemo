@@ -116,6 +116,7 @@ public class Glide implements ComponentCallbacks2 {
   //内存缓存
   private final MemoryCache memoryCache;
   private final BitmapPreFiller bitmapPreFiller;
+  //glide的上下文
   private final GlideContext glideContext;
   private final Registry registry;
   //用于存储数组的 池子 ，用于存放那些呢？
@@ -350,7 +351,7 @@ public class Glide implements ComponentCallbacks2 {
   }
 
   Glide(
-      @NonNull Context context,
+      @NonNull Context context,//这个是 ApplicationContext
       @NonNull Engine engine,
       @NonNull MemoryCache memoryCache,
       @NonNull BitmapPool bitmapPool,
@@ -367,11 +368,13 @@ public class Glide implements ComponentCallbacks2 {
     this.requestManagerRetriever = requestManagerRetriever;
     this.connectivityMonitorFactory = connectivityMonitorFactory;
 
+    //获取DecodeFormat 默认是 PREFER_ARGB_8888
     DecodeFormat decodeFormat = defaultRequestOptions.getOptions().get(Downsampler.DECODE_FORMAT);
     bitmapPreFiller = new BitmapPreFiller(memoryCache, bitmapPool, decodeFormat);
 
     final Resources resources = context.getResources();
 
+    //创建注册表
     registry = new Registry();
     // Right now we're only using this parser for HEIF images, which are only supported on OMR1+.
     // If we need this for other file types, we should consider removing this restriction.
