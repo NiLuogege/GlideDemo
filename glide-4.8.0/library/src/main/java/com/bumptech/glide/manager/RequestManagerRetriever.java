@@ -163,6 +163,7 @@ public class RequestManagerRetriever implements Handler.Callback {
       //获取 FragmentManager
       android.app.FragmentManager fm = activity.getFragmentManager();
 
+      //创建并添加 RequestManagerFragment ，创建RequestManager 并返回
       return fragmentGet(
           activity, fm, /*parentHint=*/ null, isActivityVisible(activity));
     }

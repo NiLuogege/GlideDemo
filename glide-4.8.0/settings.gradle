@@ -1,3 +1,4 @@
+include ':samples:test'
 exec {
     commandLine "git", "submodule", "update", "--init", "--recursive"
     ignoreExitValue true
