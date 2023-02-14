@@ -234,7 +234,11 @@ public class Glide implements ComponentCallbacks2 {
     initializeGlide(context, new GlideBuilder());
   }
 
-  //初始化 Glide
+  /**
+   * 初始化 Glide
+   *
+   * 这个方法中会从 我们自定义的 AppGlideModule 中读取 开发者自定义的配置 然后创建 Glide
+   */
   @SuppressWarnings("deprecation")
   private static void initializeGlide(@NonNull Context context, @NonNull GlideBuilder builder) {
     Context applicationContext = context.getApplicationContext();
@@ -279,21 +283,27 @@ public class Glide implements ComponentCallbacks2 {
             ? annotationGeneratedModule.getRequestManagerFactory() : null;
     builder.setRequestManagerFactory(factory);
     for (com.bumptech.glide.module.GlideModule module : manifestModules) {
-      //调用所有 GlideModule的 applyOptions方法
+      //调用所有 GlideModule的 applyOptions方法 为了兼容glide 3.0
       module.applyOptions(applicationContext, builder);
     }
+
+
     if (annotationGeneratedModule != null) {
+      //调用 AppGlideModule 的 applyOptions 方法
       annotationGeneratedModule.applyOptions(applicationContext, builder);
     }
     //创建 Glide 实例
     Glide glide = builder.build(applicationContext);
     for (com.bumptech.glide.module.GlideModule module : manifestModules) {
-      //调用所有 GlideModule的 registerComponents 方法
+      //调用所有 GlideModule的 registerComponents 方法 为了兼容glide 3.0
       module.registerComponents(applicationContext, glide, glide.registry);
     }
     if (annotationGeneratedModule != null) {
+      //调用 AppGlideModule 的 registerComponents 方法
       annotationGeneratedModule.registerComponents(applicationContext, glide, glide.registry);
     }
+
+    //将实现了 ComponentCallbacks2 的Glide注册给 系统， 从而获得onLowMemory 回调
     applicationContext.registerComponentCallbacks(glide);
     Glide.glide = glide;
   }

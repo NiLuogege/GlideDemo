@@ -36,9 +36,11 @@ public class Engine implements EngineJobListener,
   private static final boolean VERBOSE_IS_LOGGABLE = Log.isLoggable(TAG, Log.VERBOSE);
   private final Jobs jobs;
   private final EngineKeyFactory keyFactory;
+  //内存缓存 默认为 LruResourceCache
   private final MemoryCache cache;
   private final EngineJobFactory engineJobFactory;
   private final ResourceRecycler resourceRecycler;
+  //硬盘缓存的封装 硬盘缓存策略默认为 InternalCacheDiskCacheFactory
   private final LazyDiskCacheProvider diskCacheProvider;
   private final DecodeJobFactory decodeJobFactory;
   private final ActiveResources activeResources;
@@ -80,16 +82,21 @@ public class Engine implements EngineJobListener,
       EngineJobFactory engineJobFactory,
       DecodeJobFactory decodeJobFactory,
       ResourceRecycler resourceRecycler,
-      boolean isActiveResourceRetentionAllowed) {
+      boolean isActiveResourceRetentionAllowed //是否开启 正在活动的图片的缓存
+  ) {
+    //内存缓存 默认为 LruResourceCache
     this.cache = cache;
+    //硬盘缓存的封装 硬盘缓存策略默认为 InternalCacheDiskCacheFactory
     this.diskCacheProvider = new LazyDiskCacheProvider(diskCacheFactory);
 
+    //初始化正在活动的图片缓存
     if (activeResources == null) {
       activeResources = new ActiveResources(isActiveResourceRetentionAllowed);
     }
     this.activeResources = activeResources;
     activeResources.setListener(this);
 
+    //创建图片唯一标识的 工程类
     if (keyFactory == null) {
       keyFactory = new EngineKeyFactory();
     }
@@ -100,6 +107,7 @@ public class Engine implements EngineJobListener,
     }
     this.jobs = jobs;
 
+    //用于管理线程池的
     if (engineJobFactory == null) {
       engineJobFactory =
           new EngineJobFactory(
@@ -107,16 +115,19 @@ public class Engine implements EngineJobListener,
     }
     this.engineJobFactory = engineJobFactory;
 
+    //创建解码的 DecodeJobFactory
     if (decodeJobFactory == null) {
       decodeJobFactory = new DecodeJobFactory(diskCacheProvider);
     }
     this.decodeJobFactory = decodeJobFactory;
 
+    //初始化用于回收资源的类
     if (resourceRecycler == null) {
       resourceRecycler = new ResourceRecycler();
     }
     this.resourceRecycler = resourceRecycler;
 
+    //设置资源回收监听 为 自己，当有资源回收是会调用 onResourceRemoved 方法
     cache.setResourceRemovedListener(this);
   }
 

@@ -14,6 +14,8 @@ import com.bumptech.glide.util.Synthetic;
 /**
  * A calculator that tries to intelligently determine cache sizes for a given device based on some
  * constants and the devices screen density, width, and height.
+ *
+ * 用于计算 内存占用大小的，其中 arrayPoolSize， memoryCacheSize bitmapPoolSize 的大小都是在它里面来确定的
  */
 public final class MemorySizeCalculator {
   private static final String TAG = "MemorySizeCalculator";
@@ -61,6 +63,21 @@ public final class MemorySizeCalculator {
       bitmapPoolSize = Math.round(part * builder.bitmapPoolScreens);
     }
 
+    /**
+     * glide 中的log是通过系统的Log来输出的，想让log在logcat中正常显示需要 执行adb 命令才可以，例如
+     *adb shell setprop log.tag.MemorySizeCalculator VERBOSE
+     *
+     * 下面是我调试时的 log输出
+     *
+     * Calculation complete, Calculated
+     * memory cache size: 19.20 MB,
+     * pool size: 9.60 MB,
+     * byte array size: 4.19 MB,
+     * memory class limited? false,
+     * max size: 161 MB,
+     * memoryClass: 384,
+     * isLowMemoryDevice: false
+     */
     if (Log.isLoggable(TAG, Log.DEBUG)) {
       Log.d(
           TAG,

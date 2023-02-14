@@ -399,16 +399,19 @@ public final class GlideBuilder {
       animationExecutor = GlideExecutor.newAnimationExecutor();
     }
 
+    //初始化 图片内存缓存 占用具体内存的值
     if (memorySizeCalculator == null) {
       memorySizeCalculator = new MemorySizeCalculator.Builder(context).build();
     }
 
+    //用户监控网络连通性的
     if (connectivityMonitorFactory == null) {
       connectivityMonitorFactory = new DefaultConnectivityMonitorFactory();
     }
 
     //用于配置Glide的Bitmap缓存池
     if (bitmapPool == null) {
+      //size 一般都是 ＞0的，所以默认为 LruBitmapPool
       int size = memorySizeCalculator.getBitmapPoolSize();
       if (size > 0) {
         bitmapPool = new LruBitmapPool(size);
@@ -431,6 +434,7 @@ public final class GlideBuilder {
       diskCacheFactory = new InternalCacheDiskCacheFactory(context);
     }
 
+    //创建 Engine
     if (engine == null) {
       engine =
           new Engine(
