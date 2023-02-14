@@ -377,14 +377,17 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
       if (!isViewStateAndSizeValid(currentWidth, currentHeight)) {
         return;
       }
-
+      //回调 onSizeReady 方法
       notifyCbs(currentWidth, currentHeight);
       clearCallbacksAndListener();
     }
 
     void getSize(@NonNull SizeReadyCallback cb) {
+      //通过LayoutParams计算宽度
       int currentWidth = getTargetWidth();
+      //通过LayoutParams计算高度
       int currentHeight = getTargetHeight();
+      //如果 图片尺寸可用直接回调onSizeReady 方法，一般都是可用的
       if (isViewStateAndSizeValid(currentWidth, currentHeight)) {
         cb.onSizeReady(currentWidth, currentHeight);
         return;
@@ -392,10 +395,12 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
 
       // We want to notify callbacks in the order they were added and we only expect one or two
       // callbacks to be added a time, so a List is a reasonable choice.
+      //图片尺寸不可用的话 将回调接口加入到 cbs集合中
       if (!cbs.contains(cb)) {
         cbs.add(cb);
       }
       if (layoutListener == null) {
+        //设置监听，监听view绘制 ，当大小确定后 最终还是回调 onSizeReady 方法
         ViewTreeObserver observer = view.getViewTreeObserver();
         layoutListener = new SizeDeterminerLayoutListener(this);
         observer.addOnPreDrawListener(layoutListener);
@@ -438,6 +443,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
       return getTargetDimen(view.getHeight(), layoutParamSize, verticalPadding);
     }
 
+    //通过LayoutParams计算宽度
     private int getTargetWidth() {
       int horizontalPadding = view.getPaddingLeft() + view.getPaddingRight();
       LayoutParams layoutParams = view.getLayoutParams();
@@ -521,6 +527,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
         }
         SizeDeterminer sizeDeterminer = sizeDeterminerRef.get();
         if (sizeDeterminer != null) {
+          //这里会回调 onSizeReady 方法
           sizeDeterminer.checkCurrentDimens();
         }
         return true;

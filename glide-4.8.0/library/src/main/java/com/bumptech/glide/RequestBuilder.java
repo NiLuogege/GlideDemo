@@ -636,7 +636,9 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
     //构建一个 Request 一般会返回一个 SingleRequest
     Request request = buildRequest(target, targetListener, options);
 
+    //获取这个 ImageView的上一个 加载图片请求
     Request previous = target.getRequest();
+    //判断上个请求和当前请求是否一样，防止 重复请求，不是主流程
     if (request.isEquivalentTo(previous)
         && !isSkipMemoryCacheWithCompletePreviousRequest(options, previous)) {
       request.recycle();
@@ -653,11 +655,14 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
       return target;
     }
 
+    //先取消之前的请求
     requestManager.clear(target);
+    //请求设置给 target ，asDrawable() 流程中 target 为 DrawableImageViewTarget
     target.setRequest(request);
     //开始执行这个 request
     requestManager.track(target, request);
 
+    //返回 target
     return target;
   }
 

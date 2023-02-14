@@ -11,6 +11,8 @@ import java.util.WeakHashMap;
 /**
  * Holds the set of {@link Target}s currently active for a
  * {@link com.bumptech.glide.RequestManager} and forwards on lifecycle events.
+ *
+ * 将命周期转发给 Target
  */
 public final class TargetTracker implements LifecycleListener {
   private final Set<Target<?>> targets =

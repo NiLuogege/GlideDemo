@@ -46,8 +46,8 @@ import java.net.URL;
  * @see Glide#with(android.app.Fragment)
  * @see Glide#with(android.support.v4.app.Fragment)
  * @see Glide#with(Context)
- *
- *
+ * <p>
+ * <p>
  * 一个加载图片的类
  */
 public class RequestManager implements LifecycleListener,
@@ -145,9 +145,8 @@ public class RequestManager implements LifecycleListener,
    *
    * <p>The modified options will only be applied to loads started after this method is called.
    *
-   * @see RequestBuilder#apply(RequestOptions)
-   *
    * @return This request manager.
+   * @see RequestBuilder#apply(RequestOptions)
    */
   @NonNull
   public RequestManager applyDefaultRequestOptions(@NonNull RequestOptions requestOptions) {
@@ -167,9 +166,8 @@ public class RequestManager implements LifecycleListener,
    * the {@link RequestOptions} provided here. Instead the manager will create a clone of these
    * options and mutate the clone.
    *
-   * @see #applyDefaultRequestOptions(RequestOptions)
-   *
    * @return This request manager.
+   * @see #applyDefaultRequestOptions(RequestOptions)
    */
   @NonNull
   public RequestManager setDefaultRequestOptions(@NonNull RequestOptions requestOptions) {
@@ -526,7 +524,7 @@ public class RequestManager implements LifecycleListener,
    *
    * @param resourceClass The resource to decode.
    * @return A new request builder for loading the given resource class.
-   *
+   * <p>
    * asDrawable() 流程时  resourceClass 为 Class<Drawable>
    */
   @NonNull
@@ -618,7 +616,10 @@ public class RequestManager implements LifecycleListener,
     }
   }
 
-  void track(@NonNull Target<?> target, @NonNull Request request) {
+  //执行属于target 的 这个 request
+  void track(@NonNull Target<?> target, //asDrawable() 流程中 target 为 DrawableImageViewTarget
+      @NonNull Request request) {
+    //将当前target 添加到 Tracker 中
     targetTracker.track(target);
     //开始执行这个 request
     requestTracker.runRequest(request);

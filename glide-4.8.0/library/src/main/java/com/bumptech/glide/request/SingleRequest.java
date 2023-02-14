@@ -228,6 +228,7 @@ public final class SingleRequest<R> implements Request,
     POOL.release(this);
   }
 
+  //开始请求
   @Override
   public void begin() {
     assertNotCallingCallbacks();
@@ -271,12 +272,12 @@ public final class SingleRequest<R> implements Request,
     if (Util.isValidDimensions(overrideWidth, overrideHeight)) {
       onSizeReady(overrideWidth, overrideHeight);
     } else {
-      //自己取获取尺寸
+      //自己取获取尺寸，尺寸计算好了会回调 本类的 onSizeReady 方法
       target.getSize(this);
     }
 
-    if ((status == Status.RUNNING || status == Status.WAITING_FOR_SIZE)
-        && canNotifyStatusChanged()) {
+    if ((status == Status.RUNNING || status == Status.WAITING_FOR_SIZE)&& canNotifyStatusChanged()) {
+      //开始加载了设置 占位图
       target.onLoadStarted(getPlaceholderDrawable());
     }
     if (IS_VERBOSE_LOGGABLE) {
@@ -639,6 +640,11 @@ public final class SingleRequest<R> implements Request,
     notifyLoadFailed();
   }
 
+  /**
+   * 判断两个请求是否等价（一模一样）
+   *
+   * 当图片大小，model（加载方式 Sting类型的url 资源 等待），变换 ，请求配置 ，优先级都相等的时候就 是true
+   */
   @Override
   public boolean isEquivalentTo(Request o) {
     if (o instanceof SingleRequest) {

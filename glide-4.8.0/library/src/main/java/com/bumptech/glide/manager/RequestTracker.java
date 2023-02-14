@@ -38,10 +38,12 @@ public class RequestTracker {
   /**
    * Starts tracking the given request.
    */
-  public void runRequest(@NonNull Request request) {
+  public void runRequest(@NonNull Request request//一般为 SingleRequest
+  ) {
+    //加入到set集合中
     requests.add(request);
 
-    //如果管理的没有暂停 则开始请求，如果暂停了 不直接删除，不进行请求
+    //如果管理的没有暂停 则开始请求，如果暂停了 直接删除，不进行请求
     if (!isPaused) {
       request.begin();
     } else {
