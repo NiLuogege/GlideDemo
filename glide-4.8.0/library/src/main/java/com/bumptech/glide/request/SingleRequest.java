@@ -31,18 +31,22 @@ import java.util.List;
  * {@link Target}.
  *
  * @param <R> The type of the resource that will be transcoded from the loaded resource.
- *
- * 默认的 Request
- *
- * 开始请求是在他的 begin 方法中
+ *            <p>
+ *            默认的 Request
+ *            <p>
+ *            开始请求是在他的 begin 方法中
  */
 public final class SingleRequest<R> implements Request,
     SizeReadyCallback,
     ResourceCallback,
     FactoryPools.Poolable {
-  /** Tag for logging internal events, not generally suitable for public use. */
+  /**
+   * Tag for logging internal events, not generally suitable for public use.
+   */
   private static final String TAG = "Request";
-  /** Tag for logging externally useful events (request completion, timing etc). */
+  /**
+   * Tag for logging externally useful events (request completion, timing etc).
+   */
   private static final String GLIDE_TAG = "Glide";
   private static final Pools.Pool<SingleRequest<?>> POOL = FactoryPools.simple(150,
       new FactoryPools.Factory<SingleRequest<?>>() {
@@ -116,20 +120,23 @@ public final class SingleRequest<R> implements Request,
   public static <R> SingleRequest<R> obtain(
       Context context,
       GlideContext glideContext,
-      Object model,
-      Class<R> transcodeClass,
+      Object model,//在加载网络图片的时候就是 String 类型的 url
+      Class<R> transcodeClass,//asDrawable() 流程时  transcodeClass 为 Class<Drawable>
       RequestOptions requestOptions,
-      int overrideWidth,
-      int overrideHeight,
-      Priority priority,
-      Target<R> target,
-      RequestListener<R> targetListener,
-      @Nullable List<RequestListener<R>> requestListeners,
-      RequestCoordinator requestCoordinator,
-      Engine engine,
-      TransitionFactory<? super R> animationFactory) {
-    @SuppressWarnings("unchecked") SingleRequest<R> request =
-        (SingleRequest<R>) POOL.acquire();
+      int overrideWidth,//图片宽度 没有设置的话为 -1
+      int overrideHeight,//图片高度 没有设置的话为 -1
+      Priority priority,//优先级
+      Target<R> target,//asDrawable() 流程中 target 为 DrawableImageViewTarget
+      RequestListener<R> targetListener,// targetListener 一般为 null
+      @Nullable List<RequestListener<R>> requestListeners,// 一般为null
+      RequestCoordinator requestCoordinator,// 一般为null
+      Engine engine,//Engine
+      TransitionFactory<? super R> animationFactory//为 NoAnimationFactory
+  ) {
+    @SuppressWarnings("unchecked")
+        //从 缓冲池中 创建或者直接获取一个 SingleRequest
+    SingleRequest<R> request = (SingleRequest<R>) POOL.acquire();
+    //池子里没拿到就new 一个
     if (request == null) {
       request = new SingleRequest<>();
     }
@@ -160,18 +167,19 @@ public final class SingleRequest<R> implements Request,
   private void init(
       Context context,
       GlideContext glideContext,
-      Object model,
-      Class<R> transcodeClass,
+      Object model,//在加载网络图片的时候就是 String 类型的 url
+      Class<R> transcodeClass,//asDrawable() 流程时  transcodeClass 为 Class<Drawable>
       RequestOptions requestOptions,
-      int overrideWidth,
-      int overrideHeight,
-      Priority priority,
-      Target<R> target,
-      RequestListener<R> targetListener,
-      @Nullable List<RequestListener<R>> requestListeners,
-      RequestCoordinator requestCoordinator,
-      Engine engine,
-      TransitionFactory<? super R> animationFactory) {
+      int overrideWidth,//图片宽度 没有设置的话为 -1
+      int overrideHeight,//图片高度 没有设置的话为 -1
+      Priority priority,//优先级
+      Target<R> target,//asDrawable() 流程中 target 为 DrawableImageViewTarget
+      RequestListener<R> targetListener,// 一般为null
+      @Nullable List<RequestListener<R>> requestListeners,// 一般为null
+      RequestCoordinator requestCoordinator,// 一般为null
+      Engine engine,//Engine
+      TransitionFactory<? super R> animationFactory//为 NoAnimationFactory
+  ) {
     this.context = context;
     this.glideContext = glideContext;
     this.model = model;
@@ -186,6 +194,7 @@ public final class SingleRequest<R> implements Request,
     this.requestCoordinator = requestCoordinator;
     this.engine = engine;
     this.animationFactory = animationFactory;
+    //设置状态为 待开始
     status = Status.PENDING;
   }
 
@@ -372,7 +381,7 @@ public final class SingleRequest<R> implements Request,
   }
 
   private Drawable getPlaceholderDrawable() {
-     if (placeholderDrawable == null) {
+    if (placeholderDrawable == null) {
       placeholderDrawable = requestOptions.getPlaceholderDrawable();
       if (placeholderDrawable == null && requestOptions.getPlaceholderId() > 0) {
         placeholderDrawable = loadDrawable(requestOptions.getPlaceholderId());

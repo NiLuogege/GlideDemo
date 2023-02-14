@@ -71,9 +71,10 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
   @Nullable private Object model;
   // model may occasionally be null, so to enforce that load() was called, put a boolean rather
   // than relying on model not to be null.
+  //一般为空
   @Nullable private List<RequestListener<TranscodeType>> requestListeners;
   @Nullable private RequestBuilder<TranscodeType> thumbnailBuilder;
-  @Nullable private RequestBuilder<TranscodeType> errorBuilder;
+  @Nullable private RequestBuilder<TranscodeType> errorBuilder;//一般为null
   @Nullable private Float thumbSizeMultiplier;
   private boolean isDefaultTransitionOptionsSet = true;
   private boolean isModelSet;
@@ -632,7 +633,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
     }
 
     options = options.autoClone();
-    //构建一个 Request
+    //构建一个 Request 一般会返回一个 SingleRequest
     Request request = buildRequest(target, targetListener, options);
 
     Request previous = target.getRequest();
@@ -904,17 +905,18 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
   }
 
   private Request buildRequestRecursive(
-      Target<TranscodeType> target,
-      @Nullable RequestListener<TranscodeType> targetListener,
-      @Nullable RequestCoordinator parentCoordinator,
-      TransitionOptions<?, ? super TranscodeType> transitionOptions,
-      Priority priority,
-      int overrideWidth,
-      int overrideHeight,
+      Target<TranscodeType> target,//asDrawable() 流程中 target 为 DrawableImageViewTarget
+      @Nullable RequestListener<TranscodeType> targetListener,// targetListener 一般为 null
+      @Nullable RequestCoordinator parentCoordinator,// 一般为null
+      TransitionOptions<?, ? super TranscodeType> transitionOptions,//默认的话为  GenericTransitionOptions
+      Priority priority,//优先级
+      int overrideWidth,//图片宽度 没有设置的话为 -1
+      int overrideHeight,//图片高度 没有设置的话为 -1
       RequestOptions requestOptions) {
 
     // Build the ErrorRequestCoordinator first if necessary so we can update parentCoordinator.
     ErrorRequestCoordinator errorRequestCoordinator = null;
+    //errorBuilder 一般为 null 不是核心流程
     if (errorBuilder != null) {
       errorRequestCoordinator = new ErrorRequestCoordinator(parentCoordinator);
       parentCoordinator = errorRequestCoordinator;
@@ -931,6 +933,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
             overrideHeight,
             requestOptions);
 
+    //一般会走这个if
     if (errorRequestCoordinator == null) {
       return mainRequest;
     }
@@ -957,14 +960,15 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
   }
 
   private Request buildThumbnailRequestRecursive(
-      Target<TranscodeType> target,
-      RequestListener<TranscodeType> targetListener,
-      @Nullable RequestCoordinator parentCoordinator,
-      TransitionOptions<?, ? super TranscodeType> transitionOptions,
-      Priority priority,
-      int overrideWidth,
-      int overrideHeight,
+      Target<TranscodeType> target,//asDrawable() 流程中 target 为 DrawableImageViewTarget
+      RequestListener<TranscodeType> targetListener,// targetListener 一般为 null
+      @Nullable RequestCoordinator parentCoordinator,// 一般为null
+      TransitionOptions<?, ? super TranscodeType> transitionOptions,//默认的话为  GenericTransitionOptions
+      Priority priority,//优先级
+      int overrideWidth,//图片宽度 没有设置的话为 -1
+      int overrideHeight,//图片高度 没有设置的话为 -1
       RequestOptions requestOptions) {
+    //一般为 null ,不是核心流程
     if (thumbnailBuilder != null) {
       // Recursive case: contains a potentially recursive thumbnail request builder.
       if (isThumbnailBuilt) {
@@ -1019,7 +1023,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
       isThumbnailBuilt = false;
       coordinator.setRequests(fullRequest, thumbRequest);
       return coordinator;
-    } else if (thumbSizeMultiplier != null) {
+    } else if (thumbSizeMultiplier != null) {//一般为 null ,不是核心流程
       // Base case: thumbnail multiplier generates a thumbnail request, but cannot recurse.
       ThumbnailRequestCoordinator coordinator = new ThumbnailRequestCoordinator(parentCoordinator);
       Request fullRequest =
@@ -1049,7 +1053,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
       coordinator.setRequests(fullRequest, thumbnailRequest);
       return coordinator;
     } else {
-      // Base case: no thumbnail.
+      // 一般没有缩略图的话会走这个
       return obtainRequest(
           target,
           targetListener,
@@ -1063,28 +1067,32 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
   }
 
   private Request obtainRequest(
-      Target<TranscodeType> target,
-      RequestListener<TranscodeType> targetListener,
+      Target<TranscodeType> target,//asDrawable() 流程中 target 为 DrawableImageViewTarget
+      RequestListener<TranscodeType> targetListener,// targetListener 一般为 null
       RequestOptions requestOptions,
-      RequestCoordinator requestCoordinator,
-      TransitionOptions<?, ? super TranscodeType> transitionOptions,
-      Priority priority,
-      int overrideWidth,
-      int overrideHeight) {
+      RequestCoordinator requestCoordinator,// 一般为null
+      TransitionOptions<?, ? super TranscodeType> transitionOptions,//默认的话为  GenericTransitionOptions
+      Priority priority,//优先级
+      int overrideWidth,//图片宽度 没有设置的话为 -1
+      int overrideHeight//图片高度 没有设置的话为 -1
+  ) {
     return SingleRequest.obtain(
         context,
         glideContext,
-        model,
-        transcodeClass,
+        model,//在加载网络图片的时候就是 String 类型的 url
+        transcodeClass,//asDrawable() 流程时  transcodeClass 为 Class<Drawable>
         requestOptions,
-        overrideWidth,
-        overrideHeight,
-        priority,
-        target,
-        targetListener,
-        requestListeners,
-        requestCoordinator,
-        glideContext.getEngine(),
-        transitionOptions.getTransitionFactory());
+        overrideWidth,//图片宽度 没有设置的话为 -1
+        overrideHeight,//图片高度 没有设置的话为 -1
+        priority,//优先级
+        target,//asDrawable() 流程中 target 为 DrawableImageViewTarget
+        targetListener,// targetListener 一般为 null
+        requestListeners,// 一般为null
+        requestCoordinator,// 一般为null
+        glideContext.getEngine(),//Engine
+        //transitionOptions 默认的话为  GenericTransitionOptions
+        //transitionOptions.getTransitionFactory() 为 NoAnimationFactory
+        transitionOptions.getTransitionFactory()
+    );
   }
 }
