@@ -18,6 +18,12 @@ import com.bumptech.glide.Registry;
  */
 @SuppressWarnings("deprecation")
 public abstract class LibraryGlideModule implements RegistersComponents {
+
+  /**
+   * 替换组件用
+   *
+   * 比如这里可以替换  网络请求组件
+   */
   @Override
   public void registerComponents(@NonNull Context context, @NonNull Glide glide,
       @NonNull Registry registry) {

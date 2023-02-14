@@ -10,6 +10,9 @@ import java.io.File;
  * available. If ever fell back to the internal disk cache, will use that one from that moment on.
  *
  * <p><b>Images can be read by everyone when using external disk cache.</b>
+ *
+ *
+ * 缓存到SD卡的磁盘缓存策略
  */
 // Public API.
 @SuppressWarnings({"unused", "WeakerAccess"})

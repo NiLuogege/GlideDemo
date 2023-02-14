@@ -224,6 +224,7 @@ public class Glide implements ComponentCallbacks2 {
   @SuppressWarnings("deprecation")
   private static void initializeGlide(@NonNull Context context, @NonNull GlideBuilder builder) {
     Context applicationContext = context.getApplicationContext();
+    //下面会读取AndroidManifest.xml文件中配置的Glide 的自定义配置（GlideModule）
     GeneratedAppGlideModule annotationGeneratedModule = getAnnotationGeneratedGlideModules();
     List<com.bumptech.glide.module.GlideModule> manifestModules = Collections.emptyList();
     if (annotationGeneratedModule == null || annotationGeneratedModule.isManifestParsingEnabled()) {
@@ -258,13 +259,16 @@ public class Glide implements ComponentCallbacks2 {
             ? annotationGeneratedModule.getRequestManagerFactory() : null;
     builder.setRequestManagerFactory(factory);
     for (com.bumptech.glide.module.GlideModule module : manifestModules) {
+      //调用所有 GlideModule的 applyOptions方法
       module.applyOptions(applicationContext, builder);
     }
     if (annotationGeneratedModule != null) {
       annotationGeneratedModule.applyOptions(applicationContext, builder);
     }
+    //创建 Glide 实例
     Glide glide = builder.build(applicationContext);
     for (com.bumptech.glide.module.GlideModule module : manifestModules) {
+      //调用所有 GlideModule的 registerComponents 方法
       module.registerComponents(applicationContext, glide, glide.registry);
     }
     if (annotationGeneratedModule != null) {

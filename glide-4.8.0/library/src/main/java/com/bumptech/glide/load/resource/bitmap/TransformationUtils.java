@@ -125,6 +125,7 @@ public final class TransformationUtils {
     final float dx;
     final float dy;
     Matrix m = new Matrix();
+    //计算缩放比
     if (inBitmap.getWidth() * height > width * inBitmap.getHeight()) {
       scale = (float) height / (float) inBitmap.getHeight();
       dx = (width - inBitmap.getWidth() * scale) * 0.5f;
@@ -138,8 +139,10 @@ public final class TransformationUtils {
     m.setScale(scale, scale);
     m.postTranslate((int) (dx + 0.5f), (int) (dy + 0.5f));
 
+    //从 bitmap 缓存池中获取一个 合适的 bitmap，防止重复创建 耗费内存
     Bitmap result = pool.get(width, height, getNonNullConfig(inBitmap));
     // We don't add or remove alpha, so keep the alpha setting of the Bitmap we were given.
+    // 设置透明度
     TransformationUtils.setAlpha(inBitmap, result);
 
     applyMatrix(inBitmap, result, m);
@@ -516,10 +519,17 @@ public final class TransformationUtils {
     return bitmap.getConfig() != null ? bitmap.getConfig() : Bitmap.Config.ARGB_8888;
   }
 
+  /**
+   *
+   * @param inBitmap 原始图片
+   * @param targetBitmap 转换后的图片
+   * @param matrix
+   */
   private static void applyMatrix(@NonNull Bitmap inBitmap, @NonNull Bitmap targetBitmap,
       Matrix matrix) {
     BITMAP_DRAWABLE_LOCK.lock();
     try {
+      //将 原始图片的 内容画到转换后的图片上
       Canvas canvas = new Canvas(targetBitmap);
       canvas.drawBitmap(inBitmap, matrix, DEFAULT_PAINT);
       clear(canvas);

@@ -36,6 +36,9 @@ public abstract class AppGlideModule extends LibraryGlideModule implements Appli
     return true;
   }
 
+  /**
+   * 更改配置用
+   */
   @Override
   public void applyOptions(@NonNull Context context, @NonNull GlideBuilder builder) {
     // Default empty impl.

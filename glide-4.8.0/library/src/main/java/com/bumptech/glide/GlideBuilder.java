@@ -384,14 +384,17 @@ public final class GlideBuilder {
 
   @NonNull
   Glide build(@NonNull Context context) {
+    //创建进行网络请求 拉取图片的线程池？
     if (sourceExecutor == null) {
       sourceExecutor = GlideExecutor.newSourceExecutor();
     }
 
+    //创建磁盘缓存线程池？
     if (diskCacheExecutor == null) {
       diskCacheExecutor = GlideExecutor.newDiskCacheExecutor();
     }
 
+    //这个用于加载帧动画的线程池？是否包含 gif图片的解析?
     if (animationExecutor == null) {
       animationExecutor = GlideExecutor.newAnimationExecutor();
     }
@@ -404,6 +407,7 @@ public final class GlideBuilder {
       connectivityMonitorFactory = new DefaultConnectivityMonitorFactory();
     }
 
+    //用于配置Glide的Bitmap缓存池
     if (bitmapPool == null) {
       int size = memorySizeCalculator.getBitmapPoolSize();
       if (size > 0) {
@@ -417,10 +421,12 @@ public final class GlideBuilder {
       arrayPool = new LruArrayPool(memorySizeCalculator.getArrayPoolSizeInBytes());
     }
 
+    //用于配置Glide的内存缓存策略，默认配置是LruResourceCache。
     if (memoryCache == null) {
       memoryCache = new LruResourceCache(memorySizeCalculator.getMemoryCacheSize());
     }
 
+    //用于配置Glide的硬盘缓存策略，默认配置是InternalCacheDiskCacheFactory。
     if (diskCacheFactory == null) {
       diskCacheFactory = new InternalCacheDiskCacheFactory(context);
     }

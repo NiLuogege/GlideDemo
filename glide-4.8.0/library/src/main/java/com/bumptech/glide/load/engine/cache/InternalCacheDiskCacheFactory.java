@@ -6,6 +6,8 @@ import java.io.File;
 /**
  * Creates an {@link com.bumptech.glide.disklrucache.DiskLruCache} based disk cache in the internal
  * disk cache directory.
+ *
+ * 缓存到 app 私有目录 的 磁盘缓存策略
  */
 // Public API.
 @SuppressWarnings({"WeakerAccess", "unused"})
