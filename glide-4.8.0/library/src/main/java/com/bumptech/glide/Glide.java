@@ -97,19 +97,28 @@ import java.util.Set;
  * A singleton to present a simple static interface for building requests with
  * {@link RequestBuilder} and maintaining an {@link Engine}, {@link BitmapPool},
  * {@link com.bumptech.glide.load.engine.cache.DiskCache} and {@link MemoryCache}.
+ *
+ *
+ *
+ * 实现了系统的  ComponentCallbacks2 接口用来监听 系统内存是否紧张（紧张的话会调用 onLowMemory 方法，）
+ * 如果紧张的话会清理自己的内存 ，memoryCache ，bitmapPool 还有 arrayPool
  */
 public class Glide implements ComponentCallbacks2 {
   private static final String DEFAULT_DISK_CACHE_DIR = "image_manager_disk_cache";
   private static final String TAG = "Glide";
+  //加上 volatile 防止字节码重排序 ，配合 DCL 模式的单例使用。
   private static volatile Glide glide;
   private static volatile boolean isInitializing;
 
   private final Engine engine;
+  //Bitmap缓冲池
   private final BitmapPool bitmapPool;
+  //内存缓存
   private final MemoryCache memoryCache;
   private final BitmapPreFiller bitmapPreFiller;
   private final GlideContext glideContext;
   private final Registry registry;
+  //用于存储数组的 池子 ，用于存放那些呢？
   private final ArrayPool arrayPool;
   private final RequestManagerRetriever requestManagerRetriever;
   private final ConnectivityMonitorFactory connectivityMonitorFactory;
@@ -122,6 +131,8 @@ public class Glide implements ComponentCallbacks2 {
    *
    * @param context A context.
    * @see #getPhotoCacheDir(android.content.Context, String)
+   *
+   * 图片缓存目录 默认为 image_manager_disk_cache
    */
   @Nullable
   public static File getPhotoCacheDir(@NonNull Context context) {
@@ -157,6 +168,8 @@ public class Glide implements ComponentCallbacks2 {
    * Get the singleton.
    *
    * @return the singleton
+   *
+   * 获取单例  DCL 模式
    */
   @NonNull
   public static Glide get(@NonNull Context context) {
@@ -221,13 +234,20 @@ public class Glide implements ComponentCallbacks2 {
     initializeGlide(context, new GlideBuilder());
   }
 
+  //初始化 Glide
   @SuppressWarnings("deprecation")
   private static void initializeGlide(@NonNull Context context, @NonNull GlideBuilder builder) {
     Context applicationContext = context.getApplicationContext();
-    //下面会读取AndroidManifest.xml文件中配置的Glide 的自定义配置（GlideModule）
+    //下面会读取 注解生成器生成的 配置类 ，实际为 GeneratedAppGlideModuleImpl
     GeneratedAppGlideModule annotationGeneratedModule = getAnnotationGeneratedGlideModules();
+
+    //存储 manifest中配置的  GlideModules，用于兼容 glide3.0
     List<com.bumptech.glide.module.GlideModule> manifestModules = Collections.emptyList();
+
+    // isManifestParsingEnabled 表示是否需要解析 manifest中配置的  GlideModules ，是为了兼容 3.0的 Glide'
+    // 这里是兼容逻辑 ，不是主流程
     if (annotationGeneratedModule == null || annotationGeneratedModule.isManifestParsingEnabled()) {
+      //解析 manifest中配置的  GlideModules
       manifestModules = new ManifestParser(applicationContext).parse();
     }
 
@@ -278,11 +298,14 @@ public class Glide implements ComponentCallbacks2 {
     Glide.glide = glide;
   }
 
+
+  //获取注解生成器生成的 配置类 ，类名固定为 com.bumptech.glide.GeneratedAppGlideModuleImpl
   @Nullable
   @SuppressWarnings({"unchecked", "deprecation", "TryWithIdenticalCatches"})
   private static GeneratedAppGlideModule getAnnotationGeneratedGlideModules() {
     GeneratedAppGlideModule result = null;
     try {
+      //反射创建 GeneratedAppGlideModuleImpl 类
       Class<GeneratedAppGlideModule> clazz =
           (Class<GeneratedAppGlideModule>)
               Class.forName("com.bumptech.glide.GeneratedAppGlideModuleImpl");

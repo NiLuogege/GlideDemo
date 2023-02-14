@@ -31,6 +31,10 @@ public abstract class AppGlideModule extends LibraryGlideModule implements Appli
    * to Glide's annotation processor.
    *
    * <p>Returns {@code true} by default.
+   *
+   * 表示是否需要解析 manifest中配置的  GlideModules ，是为了兼容 3.0的 Glide'
+   *
+   * 可以在配置的时候关闭这个功能
    */
   public boolean isManifestParsingEnabled() {
     return true;
