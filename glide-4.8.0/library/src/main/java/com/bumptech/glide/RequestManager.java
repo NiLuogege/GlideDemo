@@ -48,7 +48,7 @@ import java.net.URL;
  * @see Glide#with(Context)
  *
  *
- * 一个加载图片的列
+ * 一个加载图片的类
  */
 public class RequestManager implements LifecycleListener,
     ModelTypes<RequestBuilder<Drawable>> {

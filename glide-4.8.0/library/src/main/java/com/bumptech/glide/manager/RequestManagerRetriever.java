@@ -32,6 +32,8 @@ import java.util.Map;
 /**
  * A collection of static methods for creating new {@link com.bumptech.glide.RequestManager}s or
  * retrieving existing ones from activities and fragment.
+ *
+ * 用于创建 RequestManager 或者从activity中查询 fragment
  */
 public class RequestManagerRetriever implements Handler.Callback {
   @VisibleForTesting
@@ -482,6 +484,7 @@ public class RequestManagerRetriever implements Handler.Callback {
         @NonNull Context context);
   }
 
+  //一个 创建 RequestManager 的工厂类
   private static final RequestManagerFactory DEFAULT_FACTORY = new RequestManagerFactory() {
     @NonNull
     @Override

@@ -278,10 +278,13 @@ public class Glide implements ComponentCallbacks2 {
       }
     }
 
+    //设置 RequestManager 工程类
     RequestManagerRetriever.RequestManagerFactory factory =
         annotationGeneratedModule != null
             ? annotationGeneratedModule.getRequestManagerFactory() : null;
     builder.setRequestManagerFactory(factory);
+
+
     for (com.bumptech.glide.module.GlideModule module : manifestModules) {
       //调用所有 GlideModule的 applyOptions方法 为了兼容glide 3.0
       module.applyOptions(applicationContext, builder);

@@ -447,9 +447,11 @@ public final class GlideBuilder {
               isActiveResourceRetentionAllowed);
     }
 
+    //创建RequestManager生成者
     RequestManagerRetriever requestManagerRetriever =
         new RequestManagerRetriever(requestManagerFactory);
 
+    //创建Glide
     return new Glide(
         context,
         engine,
