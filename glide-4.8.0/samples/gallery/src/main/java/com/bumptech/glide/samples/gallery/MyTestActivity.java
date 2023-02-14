@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 public class MyTestActivity extends Activity {
   @Override
@@ -29,6 +30,21 @@ public class MyTestActivity extends Activity {
         ImageView iv = findViewById(R.id.iv);
         Glide.with(MyTestActivity.this)
             .load("http://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png")
+            .into(iv);
+      }
+    });
+
+    View btn1 = findViewById(R.id.btn1);
+    btn1.setOnClickListener(new OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        //普通 图片
+        ImageView iv = findViewById(R.id.iv);
+
+        GlideApp.with(MyTestActivity.this)
+            .load("http://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png")
+            .skipMemoryCache(true)
+            .diskCacheStrategy(DiskCacheStrategy.NONE)
             .into(iv);
       }
     });

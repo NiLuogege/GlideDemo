@@ -6,7 +6,13 @@
 
   <Button
     android:id="@+id/btn"
-    android:text="加载图票"
+    android:text="最简单的加载图片"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"/>
+
+  <Button
+    android:id="@+id/btn1"
+    android:text="加载图片不使用缓存"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"/>
 

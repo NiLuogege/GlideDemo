@@ -72,6 +72,7 @@ public class RequestManagerRetriever implements Handler.Callback {
    * Main thread handler to handle cleaning up pending fragment maps.
    */
   private final Handler handler;
+  // 默认值为 DEFAULT_FACTORY，构建RequestManager的时候会调用他的 build 方法
   private final RequestManagerFactory factory;
 
   // Objects used to find Fragments and Activities containing views.
