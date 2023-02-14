@@ -159,17 +159,27 @@ public class RequestManagerFragment extends Fragment {
     return false;
   }
 
+
+  /**
+   * 用来处理fragment嵌套的
+   * 会把子fragment加入到 childRequestManagerFragments 整个Set集合中
+   */
   @SuppressWarnings("deprecation")
   private void registerFragmentWithRoot(@NonNull Activity activity) {
     unregisterFragmentWithRoot();
+    //一般就是当前fragment
     rootRequestManagerFragment =
         Glide.get(activity).getRequestManagerRetriever().getRequestManagerFragment(activity);
-    //这里应该是处理fragment嵌套问题
+    //一般就是当前fragment,所以不会走整个 if, 这里是用来处理fragment嵌套的
     if (!equals(rootRequestManagerFragment)) {
+      //会把子 fragment 加入到 childRequestManagerFragments 整个Set集合中
       rootRequestManagerFragment.addChildRequestManagerFragment(this);
     }
   }
 
+  /**
+   * 移除子 fragment
+   */
   private void unregisterFragmentWithRoot() {
     if (rootRequestManagerFragment != null) {
       rootRequestManagerFragment.removeChildRequestManagerFragment(this);
@@ -181,6 +191,7 @@ public class RequestManagerFragment extends Fragment {
   public void onAttach(Activity activity) {
     super.onAttach(activity);
     try {
+      //注册主fragment，用来处理fragment嵌套
       registerFragmentWithRoot(activity);
     } catch (IllegalStateException e) {
       // OnAttach can be called after the activity is destroyed, see #497.
