@@ -41,6 +41,8 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
   @SuppressWarnings("PMD.CollapsibleIfStatements")
   @Override
   public boolean startNext() {
+    //他妈的这个方法 做了太多事情了，主要是去注册表中找能处理当前任务的 ModelLoader,然后封装为 LoadData （可能是多个） ，
+    // 并分会他们的 sourceKey 集合 ，对于 加载网络图片来说 这个 sourceIds 其实是 List<GlideUrl> ，而且应该只有个
     List<Key> sourceIds = helper.getCacheKeys();
     if (sourceIds.isEmpty()) {
       return false;

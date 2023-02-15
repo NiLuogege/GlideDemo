@@ -47,12 +47,17 @@ public interface ModelLoader<Model, Data> {
     public final List<Key> alternateKeys;
     public final DataFetcher<Data> fetcher;
 
-    public LoadData(@NonNull Key sourceKey, @NonNull DataFetcher<Data> fetcher) {
+
+    public LoadData(@NonNull Key sourceKey, //对于加载网络图片来说这是 GlideUrl 类型
+        @NonNull DataFetcher<Data> fetcher//对于加载网络图片来说这是 HttpUrlFetcher
+    ) {
       this(sourceKey, Collections.<Key>emptyList(), fetcher);
     }
 
-    public LoadData(@NonNull Key sourceKey, @NonNull List<Key> alternateKeys,
-        @NonNull DataFetcher<Data> fetcher) {
+    public LoadData(@NonNull Key sourceKey,  //对于加载网络图片来说这是 GlideUrl 类型
+        @NonNull List<Key> alternateKeys,// 对于加载网络图片来说这是 空数组
+        @NonNull DataFetcher<Data> fetcher//对于加载网络图片来说这是 HttpUrlFetcher
+    ) {
       this.sourceKey = Preconditions.checkNotNull(sourceKey);
       this.alternateKeys = Preconditions.checkNotNull(alternateKeys);
       this.fetcher = Preconditions.checkNotNull(fetcher);

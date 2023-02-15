@@ -206,7 +206,7 @@ final class DecodeHelper<Transcode> {
       isLoadDataSet = true;
       loadData.clear();
       //☆☆☆☆☆☆ 返回可以处理此 model的所有 ModelLoader 这里很重要欧 ☆☆☆☆☆☆
-      // 在处理 string类型的http url 的时候就返回的是如下三个 ，真正出来的保存在 StringLoader.uriLoader 中
+      // 在处理 string类型的http url 的时候就返回的是如下三个 ，真正处理的保存在 StringLoader.uriLoader 中
       // com.bumptech.glide.load.model.StringLoader@df6302c,
       // com.bumptech.glide.load.model.StringLoader@2881af5,
       // com.bumptech.glide.load.model.StringLoader@aa8508a]
@@ -218,6 +218,7 @@ final class DecodeHelper<Transcode> {
         ModelLoader<Object, ?> modelLoader = modelLoaders.get(i);
         //调用每一个 ModelLoader 的 buildLoadData 方法
         //对于 string类型的http url 就是调用  StringLoader 的 buildLoadData
+        // 这里最终回调用到 HttpGlideUrlLoader 的 buildLoadData 方法 会返回一个 LoadData
         LoadData<?> current =
             modelLoader.buildLoadData(model, width, height, options);
         if (current != null) {
@@ -241,6 +242,7 @@ final class DecodeHelper<Transcode> {
         if (!cacheKeys.contains(data.sourceKey)) {
           cacheKeys.add(data.sourceKey);
         }
+        //一般为 data.alternateKeys 为空数组
         for (int j = 0; j < data.alternateKeys.size(); j++) {
           if (!cacheKeys.contains(data.alternateKeys.get(j))) {
             cacheKeys.add(data.alternateKeys.get(j));

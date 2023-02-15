@@ -39,6 +39,7 @@ public class StringLoader<Data> implements ModelLoader<String, Data> {
     Log.e("StringLoader","uriLoader="+uriLoader);
 
     //调用 uriLoader 的  buildLoadData 方法
+    //这里 uriLoader 我们以 HttpUriLoader 为例，下来看 HttpUriLoader的 buildLoadData
     return uriLoader.buildLoadData(uri, width, height, options);
   }
 
@@ -83,6 +84,8 @@ public class StringLoader<Data> implements ModelLoader<String, Data> {
     public ModelLoader<String, InputStream> build(
         @NonNull MultiModelLoaderFactory multiFactory) {
       //这里会调用 MultiModelLoaderFactory 两个参数的 build 方法
+      //这里会找到所有可以处理 入参为 Uri.class 数据类型为 InputStream.class 的ModelLoader
+      //比如 HttpUriLoader
       return new StringLoader<>(multiFactory.build(Uri.class, InputStream.class));
     }
 
@@ -104,6 +107,8 @@ public class StringLoader<Data> implements ModelLoader<String, Data> {
     @Override
     public ModelLoader<String, ParcelFileDescriptor> build(
         @NonNull MultiModelLoaderFactory multiFactory) {
+      //这里会调用 MultiModelLoaderFactory 两个参数的 build 方法
+      //这里会找到所有可以处理 入参为 Uri.class 数据类型为 ParcelFileDescriptor.class 的ModelLoader
       return new StringLoader<>(multiFactory.build(Uri.class, ParcelFileDescriptor.class));
     }
 
@@ -124,6 +129,8 @@ public class StringLoader<Data> implements ModelLoader<String, Data> {
     @Override
     public ModelLoader<String, AssetFileDescriptor> build(
         @NonNull MultiModelLoaderFactory multiFactory) {
+      //这里会调用 MultiModelLoaderFactory 两个参数的 build 方法
+      //这里会找到所有可以处理 入参为 Uri.class 数据类型为 AssetFileDescriptor.class 的ModelLoader
       return new StringLoader<>(multiFactory.build(Uri.class, AssetFileDescriptor.class));
     }
 
