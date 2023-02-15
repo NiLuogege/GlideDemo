@@ -42,7 +42,6 @@ public class MyTestActivity extends Activity {
         //普通 图片
         ImageView iv = findViewById(R.id.iv);
 
-
         RequestOptions sharedOptions = new RequestOptions()
             .skipMemoryCache(true)
             .diskCacheStrategy(DiskCacheStrategy.NONE);
@@ -51,6 +50,19 @@ public class MyTestActivity extends Activity {
             .load("http://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png")
             .apply(sharedOptions)
             .into(iv);
+      }
+    });
+
+    findViewById(R.id.btn2).setOnClickListener(new OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        new Thread(new Runnable() {
+          @Override
+          public void run() {
+            Glide.get(MyTestActivity.this).clearMemory();
+            Glide.get(MyTestActivity.this).clearDiskCache();
+          }
+        }).start();
       }
     });
   }

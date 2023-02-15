@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine;
 
+import android.util.Log;
 import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.Registry;
@@ -45,19 +46,20 @@ final class DecodeHelper<Transcode> {
   @SuppressWarnings("unchecked")
   <R> void init(
       GlideContext glideContext,
-      Object model,
-      Key signature,
-      int width,
-      int height,
-      DiskCacheStrategy diskCacheStrategy,
-      Class<?> resourceClass,
-      Class<R> transcodeClass,
-      Priority priority,
-      Options options,
-      Map<Class<?>, Transformation<?>> transformations,
-      boolean isTransformationRequired,
-      boolean isScaleOnlyOrNoTransform,
-      DiskCacheProvider diskCacheProvider) {
+      Object model,//在加载网络图片的时候就是 String 类型的 url
+      Key signature,// 这次请求的签名，会用于 计算图片唯一id（缓存图片路径），一般为 EmptySignature
+      int width,// 图片最终宽
+      int height,// 图片最终高
+      DiskCacheStrategy diskCacheStrategy,//硬盘缓存策略 默认为 DiskCacheStrategy.AUTOMATIC
+      Class<?> resourceClass,//目前不知道干什么用的，默认为 Object.class
+      Class<R> transcodeClass,//asDrawable() 流程时  transcodeClass 为 Class<Drawable>
+      Priority priority,//优先级
+      Options options,//这次请求的配置
+      Map<Class<?>, Transformation<?>> transformations,// 用于转换 ，一般是有值得
+      boolean isTransformationRequired,//是否要进行转换，一般是 false
+      boolean isScaleOnlyOrNoTransform,//一般为true
+      DiskCacheProvider diskCacheProvider//硬盘缓存的封装 硬盘缓存策略默认为 InternalCacheDiskCacheFactory
+  ) {
     this.glideContext = glideContext;
     this.model = model;
     this.signature = signature;
@@ -199,10 +201,18 @@ final class DecodeHelper<Transcode> {
   }
 
   List<LoadData<?>> getLoadData() {
+    //loadData 没有设置的话 就进行设置
     if (!isLoadDataSet) {
       isLoadDataSet = true;
       loadData.clear();
       List<ModelLoader<Object, ?>> modelLoaders = glideContext.getRegistry().getModelLoaders(model);
+
+      //modelLoaders=[
+      // com.bumptech.glide.load.model.StringLoader@df6302c,
+      // com.bumptech.glide.load.model.StringLoader@2881af5,
+      // com.bumptech.glide.load.model.StringLoader@aa8508a]
+      Log.e("DecodeHelper","modelLoaders="+modelLoaders);
+
       //noinspection ForLoopReplaceableByForEach to improve perf
       for (int i = 0, size = modelLoaders.size(); i < size; i++) {
         ModelLoader<Object, ?> modelLoader = modelLoaders.get(i);
@@ -217,6 +227,7 @@ final class DecodeHelper<Transcode> {
   }
 
   List<Key> getCacheKeys() {
+    //cacheKeys 没有设置的话 就进行设置
     if (!isCacheKeysSet) {
       isCacheKeysSet = true;
       cacheKeys.clear();

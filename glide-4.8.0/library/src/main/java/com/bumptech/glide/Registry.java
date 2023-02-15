@@ -597,6 +597,7 @@ public class Registry {
     return dataRewinderRegistry.build(data);
   }
 
+  //获得数据加载模块 ModelLoader
   @NonNull
   public <Model> List<ModelLoader<Model, ?>> getModelLoaders(@NonNull Model model) {
     List<ModelLoader<Model, ?>> result = modelLoaderRegistry.getModelLoaders(model);

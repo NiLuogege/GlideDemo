@@ -44,6 +44,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   private final DecodeHelper<R> decodeHelper = new DecodeHelper<>();
   private final List<Throwable> throwables = new ArrayList<>();
   private final StateVerifier stateVerifier = StateVerifier.newInstance();
+  //硬盘缓存的封装 硬盘缓存策略默认为 InternalCacheDiskCacheFactory
   private final DiskCacheProvider diskCacheProvider;
   private final Pools.Pool<DecodeJob<?>> pool;
   private final DeferredEncodeManager<?> deferredEncodeManager = new DeferredEncodeManager<>();
@@ -350,8 +351,11 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
         //diskCacheStrategy.decodeCachedResource() 默认会调用到 DiskCacheStrategy.AUTOMATIC
         // 这个内部类的 decodeCachedResource 方法 返回 true
         // 所以返回的就是 Stage.RESOURCE_CACHE 代表从缓存中解码
-        return diskCacheStrategy.decodeCachedResource()
+        Stage stage = diskCacheStrategy.decodeCachedResource()
             ? Stage.RESOURCE_CACHE : getNextStage(Stage.RESOURCE_CACHE);
+        Log.e(TAG, "diskCacheStrategy= " + diskCacheStrategy + " stage =" + stage);
+
+        return stage;
       case RESOURCE_CACHE:
         return diskCacheStrategy.decodeCachedData()
             ? Stage.DATA_CACHE : getNextStage(Stage.DATA_CACHE);
@@ -713,7 +717,9 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
    * Why we're being executed again.
    */
   private enum RunReason {
-    /** The first time we've been submitted. */
+    /**
+     * The first time we've been submitted.
+     */
     INITIALIZE,
     /**
      * We want to switch from the disk cache service to the source executor.
@@ -730,17 +736,29 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
    * Where we're trying to decode data from.
    */
   private enum Stage {
-    /** The initial stage. */
+    /**
+     * The initial stage.
+     */
     INITIALIZE,
-    /** Decode from a cached resource. */
+    /**
+     * Decode from a cached resource.
+     */
     RESOURCE_CACHE,
-    /** Decode from cached source data. */
+    /**
+     * Decode from cached source data.
+     */
     DATA_CACHE,
-    /** Decode from retrieved source. */
+    /**
+     * Decode from retrieved source.
+     */
     SOURCE,
-    /** Encoding transformed resources after a successful load. */
+    /**
+     * Encoding transformed resources after a successful load.
+     */
     ENCODE,
-    /** No more viable stages. */
+    /**
+     * No more viable stages.
+     */
     FINISHED,
   }
 }
