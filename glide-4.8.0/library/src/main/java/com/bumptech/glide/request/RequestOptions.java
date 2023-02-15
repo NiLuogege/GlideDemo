@@ -259,8 +259,8 @@ public class RequestOptions implements Cloneable {
   public static RequestOptions centerInsideTransform() {
     if (centerInsideOptions == null) {
       centerInsideOptions = new RequestOptions()
-              .centerInside()
-              .autoClone();
+          .centerInside()
+          .autoClone();
     }
     return centerInsideOptions;
   }
@@ -498,7 +498,6 @@ public class RequestOptions implements Cloneable {
   }
 
   /**
-   *
    * If set to true, will only load an item if found in the cache, and will not fetch from source.
    */
   @NonNull
@@ -617,11 +616,10 @@ public class RequestOptions implements Cloneable {
    *
    * <p>Replaces any previous calls to this method or {@link #fallback(int)}.
    *
-   * @see #placeholder(Drawable)
-   * @see #placeholder(int)
-   *
    * @param drawable The drawable to display as a placeholder.
    * @return This request builder.
+   * @see #placeholder(Drawable)
+   * @see #placeholder(int)
    */
   @NonNull
   @CheckResult
@@ -648,11 +646,10 @@ public class RequestOptions implements Cloneable {
    *
    * <p>Replaces any previous calls to this method or {@link #fallback(Drawable)}.
    *
-   * @see #placeholder(Drawable)
-   * @see #placeholder(int)
-   *
    * @param resourceId The id of the resource to use as a fallback.
    * @return This request builder.
+   * @see #placeholder(Drawable)
+   * @see #placeholder(int)
    */
   @NonNull
   @CheckResult
@@ -797,9 +794,9 @@ public class RequestOptions implements Cloneable {
    * Overrides the {@link com.bumptech.glide.request.target.Target}'s width and height with the
    * given size.
    *
-   * @see #override(int, int)
    * @param size The width and height to use.
    * @return This request builder.
+   * @see #override(int, int)
    */
   @NonNull
   @CheckResult
@@ -926,9 +923,9 @@ public class RequestOptions implements Cloneable {
    * <p>This is a component option specific to {@link VideoDecoder}. If the default video
    * decoder is replaced or skipped because of your configuration, this option may be ignored.
    *
-   * @see VideoDecoder#TARGET_FRAME
    * @param frameTimeMicros The time position in microseconds of the desired frame. If negative, the
    *                        Android framework implementation return a representative frame.
+   * @see VideoDecoder#TARGET_FRAME
    */
   @NonNull
   @CheckResult
@@ -1010,8 +1007,8 @@ public class RequestOptions implements Cloneable {
    * networking library including Glide's Volley or OkHttp integration libraries, this option will
    * be ignored.
    *
-   * @see com.bumptech.glide.load.model.stream.HttpGlideUrlLoader#TIMEOUT
    * @param timeoutMs The read and write timeout in milliseconds.
+   * @see com.bumptech.glide.load.model.stream.HttpGlideUrlLoader#TIMEOUT
    */
   @NonNull
   @CheckResult
@@ -1050,7 +1047,6 @@ public class RequestOptions implements Cloneable {
   }
 
   /**
-   *
    * Applies {@link FitCenter} and to all default types, {@link DownsampleStrategy#FIT_CENTER} to
    * image types, and ignores unknown types.
    *
@@ -1148,8 +1144,10 @@ public class RequestOptions implements Cloneable {
   // calling downsample is guaranteed to modify the current object by the isAutoCloneEnabledCheck.
   @SuppressWarnings({"WeakerAccess", "CheckResult"})
   @NonNull
-  final RequestOptions optionalTransform(@NonNull DownsampleStrategy downsampleStrategy,
+  final RequestOptions optionalTransform(
+      @NonNull DownsampleStrategy downsampleStrategy,
       @NonNull Transformation<Bitmap> transformation) {
+    //isAutoCloneEnabled 默认为 false
     if (isAutoCloneEnabled) {
       return clone().optionalTransform(downsampleStrategy, transformation);
     }
@@ -1191,7 +1189,7 @@ public class RequestOptions implements Cloneable {
       @NonNull Transformation<Bitmap> transformation,
       boolean isTransformationRequired) {
     RequestOptions result = isTransformationRequired
-          ? transform(strategy, transformation) : optionalTransform(strategy, transformation);
+        ? transform(strategy, transformation) : optionalTransform(strategy, transformation);
     result.isScaleOnlyOrNoTransform = true;
     return result;
   }
@@ -1261,19 +1259,24 @@ public class RequestOptions implements Cloneable {
   @NonNull
   private RequestOptions transform(
       @NonNull Transformation<Bitmap> transformation, boolean isRequired) {
+    //isAutoCloneEnabled 默认为 false
     if (isAutoCloneEnabled) {
       return clone().transform(transformation, isRequired);
     }
 
     DrawableTransformation drawableTransformation =
         new DrawableTransformation(transformation, isRequired);
+    //添加 transformation
     transform(Bitmap.class, transformation, isRequired);
+    //设置 Drawable 这个 转换
     transform(Drawable.class, drawableTransformation, isRequired);
     // TODO: remove BitmapDrawable decoder and this transformation.
     // Registering as BitmapDrawable is simply an optimization to avoid some iteration and
     // isAssignableFrom checks when obtaining the transformation later on. It can be removed without
     // affecting the functionality.
+    //添加 BitmapDrawable 转换
     transform(BitmapDrawable.class, drawableTransformation.asBitmapDrawable(), isRequired);
+    //添加 GifDrawable 转换
     transform(GifDrawable.class, new GifDrawableTransformation(transformation), isRequired);
     return selfOrThrowIfLocked();
   }

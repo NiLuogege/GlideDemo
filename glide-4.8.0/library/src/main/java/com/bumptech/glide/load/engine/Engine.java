@@ -38,11 +38,14 @@ public class Engine implements EngineJobListener,
   private final EngineKeyFactory keyFactory;
   //内存缓存 默认为 LruResourceCache
   private final MemoryCache cache;
+  //用于创建 EngineJob 的工厂
   private final EngineJobFactory engineJobFactory;
   private final ResourceRecycler resourceRecycler;
   //硬盘缓存的封装 硬盘缓存策略默认为 InternalCacheDiskCacheFactory
   private final LazyDiskCacheProvider diskCacheProvider;
+  //用于创建 DecodeJob 的工厂
   private final DecodeJobFactory decodeJobFactory;
+  //最近使用的缓存
   private final ActiveResources activeResources;
 
   public Engine(
@@ -177,14 +180,19 @@ public class Engine implements EngineJobListener,
       boolean onlyRetrieveFromCache,//只在内存中获取 ，默认为 false
       ResourceCallback cb //对象为 SingleRequest，，当资源加载好 or 失败会回调到 SingleRequest的  onResourceReady or onLoadFailed
   ) {
+
+    Log.e(TAG,"transformations size = "+transformations.size()+ "transformations= "+transformations);
+
     Util.assertMainThread();
     long startTime = VERBOSE_IS_LOGGABLE ? LogTime.getLogTime() : 0;
 
+    //根据 model ,signature ,width ,height 等来构建一个 key ,用于标识 这个图片的 唯一key
     EngineKey key = keyFactory.buildKey(model, signature, width, height, transformations,
         resourceClass, transcodeClass, options);
 
+    //先从 最近使用的 内存图片中查找 ，可以说是第一级 内存缓存
     EngineResource<?> active = loadFromActiveResources(key, isMemoryCacheable);
-    if (active != null) {
+    if (active != null) {//找到了 直接调用 onResourceReady
       cb.onResourceReady(active, DataSource.MEMORY_CACHE);
       if (VERBOSE_IS_LOGGABLE) {
         logWithTimeAndKey("Loaded resource from active resources", startTime, key);
@@ -192,8 +200,9 @@ public class Engine implements EngineJobListener,
       return null;
     }
 
+    //从内存缓存中获取 这个是 LruResourceCache
     EngineResource<?> cached = loadFromCache(key, isMemoryCacheable);
-    if (cached != null) {
+    if (cached != null) {//找到了 直接调用 onResourceReady
       cb.onResourceReady(cached, DataSource.MEMORY_CACHE);
       if (VERBOSE_IS_LOGGABLE) {
         logWithTimeAndKey("Loaded resource from cache", startTime, key);
@@ -201,8 +210,9 @@ public class Engine implements EngineJobListener,
       return null;
     }
 
+    //从 jobs 中查找这次请求，第一次肯定是没有的
     EngineJob<?> current = jobs.get(key, onlyRetrieveFromCache);
-    if (current != null) {
+    if (current != null) {//找到了直接设置回调
       current.addCallback(cb);
       if (VERBOSE_IS_LOGGABLE) {
         logWithTimeAndKey("Added to existing load", startTime, key);
@@ -210,7 +220,7 @@ public class Engine implements EngineJobListener,
       return new LoadStatus(cb, current);
     }
 
-    //创建 EngineJob
+    //创建 并初始化 EngineJob ，这是用于加载的
     EngineJob<R> engineJob =
         engineJobFactory.build(
             key,
@@ -469,6 +479,7 @@ public class Engine implements EngineJobListener,
     @Synthetic final GlideExecutor sourceUnlimitedExecutor;
     @Synthetic final GlideExecutor animationExecutor;
     @Synthetic final EngineJobListener listener;
+    //一个 EngineJob 的池子
     @Synthetic final Pools.Pool<EngineJob<?>> pool =
         FactoryPools.simple(
             JOB_POOL_SIZE,
@@ -508,12 +519,15 @@ public class Engine implements EngineJobListener,
 
     @SuppressWarnings("unchecked")
     <R> EngineJob<R> build(
-        Key key,
-        boolean isMemoryCacheable,
-        boolean useUnlimitedSourceGeneratorPool,
-        boolean useAnimationPool,
-        boolean onlyRetrieveFromCache) {
+        Key key,//这次请求的 key
+        boolean isMemoryCacheable,//是否使用内存缓存，一般为 true
+        boolean useUnlimitedSourceGeneratorPool,//使用没有限制的线程池， 默认为false
+        boolean useAnimationPool,//默认为false
+        boolean onlyRetrieveFromCache//只在内存中获取 ，默认为 false
+    ) {
+      //从池子中获取一个 EngineJob，池子中没有的话会 创建一个新的
       EngineJob<R> result = Preconditions.checkNotNull((EngineJob<R>) pool.acquire());
+      //初始化
       return result.init(
           key,
           isMemoryCacheable,

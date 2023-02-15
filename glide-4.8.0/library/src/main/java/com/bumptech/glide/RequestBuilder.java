@@ -702,6 +702,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
       // Clone in this method so that if we use this RequestBuilder to load into a View and then
       // into a different target, we don't retain the transformation applied based on the previous
       // View's scale type.
+      //通过不同的 scalType 配置不同的 transform
       switch (view.getScaleType()) {
         case CENTER_CROP:
           requestOptions = requestOptions.clone().optionalCenterCrop();

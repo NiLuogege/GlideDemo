@@ -33,6 +33,8 @@ final class ActiveResources {
       return false;
     }
   });
+
+  //一个 key 和 弱引用的资源 映射表
   @VisibleForTesting
   final Map<Key, ResourceWeakReference> activeEngineResources = new HashMap<>();
 

@@ -43,11 +43,11 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
   private final GlideExecutor sourceUnlimitedExecutor;
   private final GlideExecutor animationExecutor;
 
-  private Key key;
-  private boolean isCacheable;
-  private boolean useUnlimitedSourceGeneratorPool;
-  private boolean useAnimationPool;
-  private boolean onlyRetrieveFromCache;
+  private Key key;//这次请求的 key
+  private boolean isCacheable;//是否使用内存缓存，一般为 true
+  private boolean useUnlimitedSourceGeneratorPool;//使用没有限制的线程池， 默认为false
+  private boolean useAnimationPool;//默认为false
+  private boolean onlyRetrieveFromCache;//只在内存中获取 ，默认为 false
   private Resource<?> resource;
   private DataSource dataSource;
   private boolean hasResource;
@@ -99,11 +99,12 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
 
   @VisibleForTesting
   EngineJob<R> init(
-      Key key,
-      boolean isCacheable,
-      boolean useUnlimitedSourceGeneratorPool,
-      boolean useAnimationPool,
-      boolean onlyRetrieveFromCache) {
+      Key key,//这次请求的 key
+      boolean isCacheable,//是否使用内存缓存，一般为 true
+      boolean useUnlimitedSourceGeneratorPool,//使用没有限制的线程池， 默认为false
+      boolean useAnimationPool,//默认为false
+      boolean onlyRetrieveFromCache//只在内存中获取 ，默认为 false
+  ) {
     this.key = key;
     this.isCacheable = isCacheable;
     this.useUnlimitedSourceGeneratorPool = useUnlimitedSourceGeneratorPool;
