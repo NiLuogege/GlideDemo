@@ -103,6 +103,7 @@ public class RequestOptions implements Cloneable {
   @Nullable
   private Drawable fallbackDrawable;
   private int fallbackId;
+  //一般配置都会装到这类的 values 里
   @NonNull
   private Options options = new Options();
   @NonNull

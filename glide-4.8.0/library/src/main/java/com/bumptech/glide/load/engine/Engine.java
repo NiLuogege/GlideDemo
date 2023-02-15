@@ -159,23 +159,24 @@ public class Engine implements EngineJobListener,
    */
   public <R> LoadStatus load(
       GlideContext glideContext,
-      Object model,
-      Key signature,
-      int width,
-      int height,
-      Class<?> resourceClass,
-      Class<R> transcodeClass,
-      Priority priority,
-      DiskCacheStrategy diskCacheStrategy,
-      Map<Class<?>, Transformation<?>> transformations,
-      boolean isTransformationRequired,
-      boolean isScaleOnlyOrNoTransform,
-      Options options,
-      boolean isMemoryCacheable,
-      boolean useUnlimitedSourceExecutorPool,
-      boolean useAnimationPool,
-      boolean onlyRetrieveFromCache,
-      ResourceCallback cb) {
+      Object model,//在加载网络图片的时候就是 String 类型的 url
+      Key signature,// 这次请求的签名，会用于 计算图片唯一id（缓存图片路径），一般为 EmptySignature
+      int width,// 图片最终宽
+      int height,// 图片最终高
+      Class<?> resourceClass,//目前不知道干什么用的，默认为 Object.class
+      Class<R> transcodeClass,//asDrawable() 流程时  transcodeClass 为 Class<Drawable>
+      Priority priority,//优先级
+      DiskCacheStrategy diskCacheStrategy,//硬盘缓存策略 默认为 DiskCacheStrategy.AUTOMATIC
+      Map<Class<?>, Transformation<?>> transformations,// 用于转换 ，一般是有值得
+      boolean isTransformationRequired,//是否要进行转换，一般是 false
+      boolean isScaleOnlyOrNoTransform,//一般为true
+      Options options,//具体配置
+      boolean isMemoryCacheable,//是否使用内存缓存，一般为 true
+      boolean useUnlimitedSourceExecutorPool,//使用没有限制的线程池， 默认为false
+      boolean useAnimationPool,//默认为false
+      boolean onlyRetrieveFromCache,//只在内存中获取 ，默认为 false
+      ResourceCallback cb //对象为 SingleRequest，，当资源加载好 or 失败会回调到 SingleRequest的  onResourceReady or onLoadFailed
+  ) {
     Util.assertMainThread();
     long startTime = VERBOSE_IS_LOGGABLE ? LogTime.getLogTime() : 0;
 

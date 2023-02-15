@@ -439,8 +439,11 @@ public final class SingleRequest<R> implements Request,
     if (status != Status.WAITING_FOR_SIZE) {
       return;
     }
+
+    //状态设置为 RUNNING
     status = Status.RUNNING;
 
+    //获取配置的乘数 对 宽高 进行修改
     float sizeMultiplier = requestOptions.getSizeMultiplier();
     this.width = maybeApplySizeMultiplier(width, sizeMultiplier);
     this.height = maybeApplySizeMultiplier(height, sizeMultiplier);
