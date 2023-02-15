@@ -68,9 +68,11 @@ public class ModelLoaderRegistry {
 
   // We're allocating in a loop to avoid allocating empty lists that will never have anything added
   // to them.
+  //返回可以处理此 model的所有 ModelLoader
   @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
   @NonNull
   public <A> List<ModelLoader<A, ?>> getModelLoaders(@NonNull A model) {
+    //获取所有以 model 的Class开头注册的 ModelLoader
     List<ModelLoader<A, ?>> modelLoaders = getModelLoadersForClass(getClass(model));
     int size = modelLoaders.size();
     boolean isEmpty = true;
@@ -78,6 +80,8 @@ public class ModelLoaderRegistry {
     //noinspection ForLoopReplaceableByForEach to improve perf
     for (int i = 0; i < size; i++) {
       ModelLoader<A, ?> loader = modelLoaders.get(i);
+      //遍历 modelLoaders 筛选出真正可以 处理该 model的 modelLoaders ，并收集到  filteredLoaders 中返回
+      //比如 DataUrlLoader 和 StringLoader 都是可以处理的 String.class类型的 但是 DataUrlLoader 不能处理 String 类型的 http 的 url
       if (loader.handles(model)) {
         if (isEmpty) {
           filteredLoaders = new ArrayList<>(size - i);

@@ -59,10 +59,10 @@ public class MyTestActivity extends Activity {
         new Thread(new Runnable() {
           @Override
           public void run() {
-            Glide.get(MyTestActivity.this).clearMemory();
             Glide.get(MyTestActivity.this).clearDiskCache();
           }
         }).start();
+        Glide.get(MyTestActivity.this).clearMemory();
       }
     });
   }

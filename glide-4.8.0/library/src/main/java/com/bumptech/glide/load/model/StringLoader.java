@@ -6,6 +6,7 @@ import android.os.ParcelFileDescriptor;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
+import android.util.Log;
 import com.bumptech.glide.load.Options;
 import java.io.File;
 import java.io.InputStream;
@@ -25,13 +26,19 @@ public class StringLoader<Data> implements ModelLoader<String, Data> {
     this.uriLoader = uriLoader;
   }
 
+  //处理 tring类型的http url 的时候会调用
   @Override
   public LoadData<Data> buildLoadData(@NonNull String model, int width, int height,
       @NonNull Options options) {
+    //将string类型的 url  转为 Uri 类型的 uri
     Uri uri = parseUri(model);
     if (uri == null || !uriLoader.handles(uri)) {
       return null;
     }
+
+    Log.e("StringLoader","uriLoader="+uriLoader);
+
+    //调用 uriLoader 的  buildLoadData 方法
     return uriLoader.buildLoadData(uri, width, height, options);
   }
 
@@ -66,6 +73,8 @@ public class StringLoader<Data> implements ModelLoader<String, Data> {
 
   /**
    * Factory for loading {@link InputStream}s from Strings.
+   *
+   * 用于处理流的
    */
   public static class StreamFactory implements ModelLoaderFactory<String, InputStream> {
 
@@ -84,6 +93,8 @@ public class StringLoader<Data> implements ModelLoader<String, Data> {
 
   /**
    * Factory for loading {@link ParcelFileDescriptor}s from Strings.
+   *
+   * 用于处理 文件的
    */
   public static class FileDescriptorFactory
       implements ModelLoaderFactory<String, ParcelFileDescriptor> {
@@ -103,6 +114,8 @@ public class StringLoader<Data> implements ModelLoader<String, Data> {
 
   /**
    * Loads {@link AssetFileDescriptor}s from Strings.
+   *
+   * 用于处理 asset file的
    */
   public static final class AssetFileDescriptorFactory
       implements ModelLoaderFactory<String, AssetFileDescriptor> {

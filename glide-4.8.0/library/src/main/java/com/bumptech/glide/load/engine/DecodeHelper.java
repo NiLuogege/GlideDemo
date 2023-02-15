@@ -205,17 +205,19 @@ final class DecodeHelper<Transcode> {
     if (!isLoadDataSet) {
       isLoadDataSet = true;
       loadData.clear();
-      List<ModelLoader<Object, ?>> modelLoaders = glideContext.getRegistry().getModelLoaders(model);
-
-      //modelLoaders=[
+      //返回可以处理此 model的所有 ModelLoader
+      // 在处理 string类型的http url 的时候就返回的是如下三个
       // com.bumptech.glide.load.model.StringLoader@df6302c,
       // com.bumptech.glide.load.model.StringLoader@2881af5,
       // com.bumptech.glide.load.model.StringLoader@aa8508a]
+      List<ModelLoader<Object, ?>> modelLoaders = glideContext.getRegistry().getModelLoaders(model);
       Log.e("DecodeHelper","modelLoaders="+modelLoaders);
 
       //noinspection ForLoopReplaceableByForEach to improve perf
       for (int i = 0, size = modelLoaders.size(); i < size; i++) {
         ModelLoader<Object, ?> modelLoader = modelLoaders.get(i);
+        //调用每一个 ModelLoader 的 buildLoadData 方法
+        //对于 tring类型的http url 就是调用  StringLoader 的 buildLoadData
         LoadData<?> current =
             modelLoader.buildLoadData(model, width, height, options);
         if (current != null) {

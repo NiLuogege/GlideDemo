@@ -600,6 +600,7 @@ public class Registry {
   //获得数据加载模块 ModelLoader
   @NonNull
   public <Model> List<ModelLoader<Model, ?>> getModelLoaders(@NonNull Model model) {
+    //返回可以处理此 model的所有 ModelLoader
     List<ModelLoader<Model, ?>> result = modelLoaderRegistry.getModelLoaders(model);
     if (result.isEmpty()) {
       throw new NoModelLoaderAvailableException(model);
