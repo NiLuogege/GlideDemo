@@ -271,6 +271,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       case INITIALIZE://初始状态
         //默认情况下 这里 stage 是 Stage.RESOURCE_CACHE 代表从缓存中解码
         stage = getNextStage(Stage.INITIALIZE);
+        //这里的 currentGenerator 为 ResourceCacheGenerator
         currentGenerator = getNextGenerator();
         runGenerators();
         break;

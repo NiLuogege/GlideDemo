@@ -221,6 +221,7 @@ final class DecodeHelper<Transcode> {
         LoadData<?> current =
             modelLoader.buildLoadData(model, width, height, options);
         if (current != null) {
+          //加入到 loadData 中
           loadData.add(current);
         }
       }
