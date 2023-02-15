@@ -50,11 +50,15 @@ class DataCacheGenerator implements DataFetcherGenerator,
         return false;
       }
 
+      //对于获取网络图片来说这里是 GlideUrl
       Key sourceId = cacheKeys.get(sourceIdIndex);
       // PMD.AvoidInstantiatingObjectsInLoops The loop iterates a limited number of times
       // and the actions it performs are much more expensive than a single allocation.
+      //获取到原始 key 这里就只包含 GlideUrl 和 Signature ，所以这里获取的是原始图片，是没有经过变化的
+      //而 ResourceCacheGenerator 中获取的是 经过变化的图片
       @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
       Key originalKey = new DataCacheKey(sourceId, helper.getSignature());
+      //从磁盘缓存中获取 cacheFile
       cacheFile = helper.getDiskCache().get(originalKey);
       if (cacheFile != null) {
         this.sourceKey = sourceId;

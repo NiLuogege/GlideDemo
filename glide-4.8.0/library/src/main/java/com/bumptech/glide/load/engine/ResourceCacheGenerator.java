@@ -42,7 +42,7 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
   @Override
   public boolean startNext() {
     //他妈的这个方法 做了太多事情了，主要是去注册表中找能处理当前任务的 ModelLoader,然后封装为 LoadData （可能是多个） ，
-    // 并分会他们的 sourceKey 集合 ，对于 加载网络图片来说 这个 sourceIds 其实是 List<GlideUrl> ，而且应该只有个
+    // 并分会他们的 sourceKey 集合 ，对于 加载网络图片来说 这个 sourceIds 其实是 List<GlideUrl> ，而且应该只有一个
     List<Key> sourceIds = helper.getCacheKeys();
     if (sourceIds.isEmpty()) {
       return false;
@@ -69,12 +69,14 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
         resourceClassIndex = 0;
       }
 
+      //加载网络图片的话 sourceId 为一个 GlideUrl
       Key sourceId = sourceIds.get(sourceIdIndex);
       Class<?> resourceClass = resourceClasses.get(resourceClassIndex);
       Transformation<?> transformation = helper.getTransformation(resourceClass);
       // PMD.AvoidInstantiatingObjectsInLoops Each iteration is comparatively expensive anyway,
       // we only run until the first one succeeds, the loop runs for only a limited
       // number of iterations on the order of 10-20 in the worst case.
+      //获取经过变化的图片的key
       currentKey =
           new ResourceCacheKey(// NOPMD AvoidInstantiatingObjectsInLoops
               helper.getArrayPool(),
@@ -85,6 +87,7 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
               transformation,
               resourceClass,
               helper.getOptions());
+      //从磁盘中获取变化过的缓存文件 ，而 DataCacheGenerator 中获取的是原始文件，是没有经过变换的
       cacheFile = helper.getDiskCache().get(currentKey);
       if (cacheFile != null) {
         sourceKey = sourceId;
@@ -93,6 +96,7 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
       }
     }
 
+    //一般不会走到这个下面
     loadData = null;
     boolean started = false;
     while (!started && hasNextModelLoader()) {

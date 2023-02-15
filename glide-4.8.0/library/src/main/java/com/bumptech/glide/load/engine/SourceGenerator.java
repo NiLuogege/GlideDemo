@@ -59,6 +59,9 @@ class SourceGenerator implements DataFetcherGenerator,
           && (helper.getDiskCacheStrategy().isDataCacheable(loadData.fetcher.getDataSource())
           || helper.hasLoadPath(loadData.fetcher.getDataClass()))) {
         started = true;
+        //这里终于他妈的开始去网络请求加载图片了
+        //对于 网络请求来说 loadData.fetcher 为 HttpUrlFetcher 所以会调用它的 loadData
+        //因为回到设置的是自己 所以 当图片下载完成后（网络请求完成）会回调当前文件的 onDataReady
         loadData.fetcher.loadData(helper.getPriority(), this);
       }
     }
@@ -100,8 +103,12 @@ class SourceGenerator implements DataFetcherGenerator,
     }
   }
 
+  /**
+   * 当为加载网络图片时 图片下载完成后（在HttpUrlFetcher 中进行的）会回调到 这个方法 data类型为 InputStream
+   */
   @Override
   public void onDataReady(Object data) {
+    //获取磁盘缓存策略
     DiskCacheStrategy diskCacheStrategy = helper.getDiskCacheStrategy();
     if (data != null && diskCacheStrategy.isDataCacheable(loadData.fetcher.getDataSource())) {
       dataToCache = data;

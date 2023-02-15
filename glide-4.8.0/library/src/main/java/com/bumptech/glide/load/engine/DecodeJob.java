@@ -290,8 +290,10 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   private DataFetcherGenerator getNextGenerator() {
     switch (stage) {
       case RESOURCE_CACHE:
+        //这里从磁盘缓存中读取
         return new ResourceCacheGenerator(decodeHelper, this);
       case DATA_CACHE:
+        //从原生数据中读取
         return new DataCacheGenerator(decodeHelper, this);
       case SOURCE:
         //这里是走网络
@@ -308,8 +310,11 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     startFetchTime = LogTime.getLogTime();
     boolean isStarted = false;
     while (!isCancelled && currentGenerator != null
-        && !(isStarted = currentGenerator.startNext())) {
+        && !(isStarted = currentGenerator.startNext()//这里会调用 currentGenerator.startNext 的方法
+    )) {
+      //这里stage的顺序为 RESOURCE_CACHE -》 DATA_CACHE -》SOURCE
       stage = getNextStage(stage);
+      //这里 currentGenerator 的顺序为 ResourceCacheGenerator-》DataCacheGenerator-》SourceGenerator
       currentGenerator = getNextGenerator();
 
       if (stage == Stage.SOURCE) {
@@ -358,6 +363,9 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
         return stage;
       case RESOURCE_CACHE:
+        // diskCacheStrategy.decodeCachedResource() 默认会调用到 DiskCacheStrategy.AUTOMATIC
+        // 这个内部类的 decodeCachedResource 方法 返回 true
+        // 所以返回的就是 DATA_CACHE
         return diskCacheStrategy.decodeCachedData()
             ? Stage.DATA_CACHE : getNextStage(Stage.DATA_CACHE);
       case DATA_CACHE:
