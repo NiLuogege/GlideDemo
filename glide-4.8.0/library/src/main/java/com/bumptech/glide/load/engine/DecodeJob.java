@@ -60,6 +60,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   private Callback<R> callback;
   private int order;
   private Stage stage;
+  //默认状态为 RunReason.INITIALIZE
   private RunReason runReason;
   private long startFetchTime;
   private boolean onlyRetrieveFromCache;
@@ -125,6 +126,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     this.options = options;
     this.callback = callback;
     this.order = order;
+    //默认状态为 RunReason.INITIALIZE
     this.runReason = RunReason.INITIALIZE;
     this.model = model;
     return this;
@@ -226,10 +228,12 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     // ensure that the fetcher is cleaned up either way.
     DataFetcher<?> localFetcher = currentFetcher;
     try {
+      //如果已经被取消了，那就回调 onLoadFailed
       if (isCancelled) {
         notifyFailed();
         return;
       }
+      //进入这个核心方法
       runWrapped();
     } catch (Throwable t) {
       // Catch Throwable and not Exception to handle OOMs. Throwables are swallowed by our
@@ -263,7 +267,8 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
   private void runWrapped() {
     switch (runReason) {
-      case INITIALIZE:
+      case INITIALIZE://初始状态
+        //默认情况下 这里 stage 是 Stage.RESOURCE_CACHE 代表从缓存中解码
         stage = getNextStage(Stage.INITIALIZE);
         currentGenerator = getNextGenerator();
         runGenerators();
@@ -342,6 +347,9 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   private Stage getNextStage(Stage current) {
     switch (current) {
       case INITIALIZE:
+        //diskCacheStrategy.decodeCachedResource() 默认会调用到 DiskCacheStrategy.AUTOMATIC
+        // 这个内部类的 decodeCachedResource 方法 返回 true
+        // 所以返回的就是 Stage.RESOURCE_CACHE 代表从缓存中解码
         return diskCacheStrategy.decodeCachedResource()
             ? Stage.RESOURCE_CACHE : getNextStage(Stage.RESOURCE_CACHE);
       case RESOURCE_CACHE:

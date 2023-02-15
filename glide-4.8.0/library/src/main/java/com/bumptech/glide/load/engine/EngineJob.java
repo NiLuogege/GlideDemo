@@ -114,10 +114,14 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
   }
 
   public void start(DecodeJob<R> decodeJob) {
+    //记录用于解码的 job
     this.decodeJob = decodeJob;
+    //是否可以直接从 硬盘中的缓存解码？ 可以的话直接 使用 diskCacheExecutor 这个线程池
+    //不行的话使用其他线程池，默认配置的话是 sourceExecutor 这个线程池
     GlideExecutor executor = decodeJob.willDecodeFromCache()
         ? diskCacheExecutor
         : getActiveSourceExecutor();
+    //开始执行  decodeJob ,会调用到 DecodeJob 的run方法
     executor.execute(decodeJob);
   }
 
