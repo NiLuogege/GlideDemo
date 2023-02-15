@@ -249,10 +249,13 @@ public class Engine implements EngineJobListener,
             options,
             engineJob);
 
+    //将这个 engineJob 进行缓存
     jobs.put(key, engineJob);
 
+    //设置 回调 为 SingleRequest ， 当 图片加载完 解码完 会回调到 SingleRequest的  onResourceReady or onLoadFailed
     engineJob.addCallback(cb);
 
+    //开始加载图片啦
     engineJob.start(decodeJob);
 
     if (VERBOSE_IS_LOGGABLE) {
@@ -435,22 +438,25 @@ public class Engine implements EngineJobListener,
 
     @SuppressWarnings("unchecked")
     <R> DecodeJob<R> build(GlideContext glideContext,
-        Object model,
-        EngineKey loadKey,
-        Key signature,
-        int width,
-        int height,
-        Class<?> resourceClass,
-        Class<R> transcodeClass,
-        Priority priority,
-        DiskCacheStrategy diskCacheStrategy,
-        Map<Class<?>, Transformation<?>> transformations,
-        boolean isTransformationRequired,
-        boolean isScaleOnlyOrNoTransform,
-        boolean onlyRetrieveFromCache,
-        Options options,
-        DecodeJob.Callback<R> callback) {
+        Object model,//在加载网络图片的时候就是 String 类型的 url
+        EngineKey loadKey,//这里加载的key
+        Key signature,// 这次请求的签名，会用于 计算图片唯一id（缓存图片路径），一般为 EmptySignature
+        int width,// 图片最终宽
+        int height,// 图片最终高
+        Class<?> resourceClass,//目前不知道干什么用的，默认为 Object.class
+        Class<R> transcodeClass,//asDrawable() 流程时  transcodeClass 为 Class<Drawable>
+        Priority priority,//优先级
+        DiskCacheStrategy diskCacheStrategy,//硬盘缓存策略 默认为 DiskCacheStrategy.AUTOMATIC
+        Map<Class<?>, Transformation<?>> transformations,// 用于转换 ，一般是有值得
+        boolean isTransformationRequired,//是否要进行转换，一般是 false
+        boolean isScaleOnlyOrNoTransform,//一般为true
+        boolean onlyRetrieveFromCache,//只在内存中获取 ，默认为 false
+        Options options,//这次请求的配置
+        DecodeJob.Callback<R> callback //解码的回调，是 EngineJob 对象，当图片解码完毕后会 调用 onResourceReady ， onLoadFailed 等方法
+    ) {
+      //从池子里获取一个DecodeJob ，没有就创建
       DecodeJob<R> result = Preconditions.checkNotNull((DecodeJob<R>) pool.acquire());
+      //初始化
       return result.init(
           glideContext,
           model,
