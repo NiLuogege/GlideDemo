@@ -275,6 +275,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
   public void reschedule(DecodeJob<?> job) {
     // Even if the job is cancelled here, it still needs to be scheduled so that it can clean itself
     // up.
+    //开始进行解码 会再次执行 DecodeJob 的 run方法
     getActiveSourceExecutor().execute(job);
   }
 

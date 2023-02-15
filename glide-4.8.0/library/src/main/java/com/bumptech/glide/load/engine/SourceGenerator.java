@@ -25,11 +25,11 @@ class SourceGenerator implements DataFetcherGenerator,
   private static final String TAG = "SourceGenerator";
 
   private final DecodeHelper<?> helper;
-  private final FetcherReadyCallback cb;
+  private final FetcherReadyCallback cb;//回调实现类为 DecodeJob
 
   private int loadDataListIndex;
   private DataCacheGenerator sourceCacheGenerator;
-  private Object dataToCache;
+  private Object dataToCache;//这是网络请求来的数据用于 缓存
   private volatile ModelLoader.LoadData<?> loadData;
   private DataCacheKey originalKey;
 
@@ -40,12 +40,14 @@ class SourceGenerator implements DataFetcherGenerator,
 
   @Override
   public boolean startNext() {
+    //如果dataToCache 不为空就会进行缓存 ,网络图片下载成功后会不为空
     if (dataToCache != null) {
       Object data = dataToCache;
       dataToCache = null;
       cacheData(data);
     }
 
+    //当sourceCacheGenerator不为空会执行 sourceCacheGenerator.startNext(),网络图片下载成功后会不为空
     if (sourceCacheGenerator != null && sourceCacheGenerator.startNext()) {
       return true;
     }
@@ -72,13 +74,17 @@ class SourceGenerator implements DataFetcherGenerator,
     return loadDataListIndex < helper.getLoadData().size();
   }
 
+  //缓存数据
   private void cacheData(Object dataToCache) {
     long startTime = LogTime.getLogTime();
     try {
+      //获取编码器这里是 StreamEncoder
       Encoder<Object> encoder = helper.getSourceEncoder(dataToCache);
       DataCacheWriter<Object> writer =
           new DataCacheWriter<>(encoder, dataToCache, helper.getOptions());
+      //创建原始key
       originalKey = new DataCacheKey(loadData.sourceKey, helper.getSignature());
+      //缓存到磁盘
       helper.getDiskCache().put(originalKey, writer);
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         Log.v(TAG, "Finished encoding source to cache"
@@ -88,9 +94,11 @@ class SourceGenerator implements DataFetcherGenerator,
             + ", duration: " + LogTime.getElapsedMillis(startTime));
       }
     } finally {
+      //对于加载网络图片来说 loadData.fetcher HttpUrlFetcher 调用 cleanup清理工作
       loadData.fetcher.cleanup();
     }
 
+    //创建 DataCacheGenerator
     sourceCacheGenerator =
         new DataCacheGenerator(Collections.singletonList(loadData.sourceKey), helper, this);
   }
@@ -108,12 +116,16 @@ class SourceGenerator implements DataFetcherGenerator,
    */
   @Override
   public void onDataReady(Object data) {
-    //获取磁盘缓存策略
+    //获取磁盘缓存策略 默认为 DiskCacheStrategy.AUTOMATIC
     DiskCacheStrategy diskCacheStrategy = helper.getDiskCacheStrategy();
+    //加载网络图片是 loadData.fetcher 为HttpUrlFetcher  loadData.fetcher.getDataSource() 为 DataSource.REMOTE
+    //所以diskCacheStrategy.isDataCacheable 为true
     if (data != null && diskCacheStrategy.isDataCacheable(loadData.fetcher.getDataSource())) {
+      //这里给 dataToCache 赋值
       dataToCache = data;
       // We might be being called back on someone else's thread. Before doing anything, we should
       // reschedule to get back onto Glide's thread.
+      //调用 DecodeJob 的 reschedule
       cb.reschedule();
     } else {
       cb.onDataFetcherReady(loadData.sourceKey, data, loadData.fetcher,

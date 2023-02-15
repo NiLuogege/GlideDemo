@@ -155,6 +155,7 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
     return stream;
   }
 
+  //清理工作
   @Override
   public void cleanup() {
     if (stream != null) {

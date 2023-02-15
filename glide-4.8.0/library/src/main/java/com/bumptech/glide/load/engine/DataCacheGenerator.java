@@ -60,6 +60,7 @@ class DataCacheGenerator implements DataFetcherGenerator,
       Key originalKey = new DataCacheKey(sourceId, helper.getSignature());
       //从磁盘缓存中获取 cacheFile
       cacheFile = helper.getDiskCache().get(originalKey);
+      //当原始图片缓存到磁盘后会 不为null
       if (cacheFile != null) {
         this.sourceKey = sourceId;
         modelLoaders = helper.getModelLoaders(cacheFile);

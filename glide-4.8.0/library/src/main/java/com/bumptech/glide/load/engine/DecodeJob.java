@@ -58,7 +58,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   private int height;
   private DiskCacheStrategy diskCacheStrategy;
   private Options options;
-  private Callback<R> callback;
+  private Callback<R> callback;//解码的回调，是 EngineJob 对象，当图片解码完毕后会 调用 onResourceReady ， onLoadFailed 等方法
   private int order;
   private Stage stage;
   //默认状态为 RunReason.INITIALIZE
@@ -296,7 +296,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
         //从原生数据中读取
         return new DataCacheGenerator(decodeHelper, this);
       case SOURCE:
-        //这里是走网络
+        //这里是走网络 ,回到为 当前类 让网络图片OK以后 会回调本类的 reschedule
         return new SourceGenerator(decodeHelper, this);
       case FINISHED:
         return null;
@@ -381,7 +381,9 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
   @Override
   public void reschedule() {
+    //这里会将 runReason 标记为 SWITCH_TO_SOURCE_SERVICE
     runReason = RunReason.SWITCH_TO_SOURCE_SERVICE;
+    //回调到 EngineJob 的 reschedule
     callback.reschedule(this);
   }
 

@@ -123,6 +123,7 @@ public abstract class DiskCacheStrategy {
   public static final DiskCacheStrategy AUTOMATIC = new DiskCacheStrategy() {
     @Override
     public boolean isDataCacheable(DataSource dataSource) {
+      //当数据源为 网络是 会进行 磁盘缓存
       return dataSource == DataSource.REMOTE;
     }
 
