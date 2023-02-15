@@ -20,6 +20,7 @@ public class HttpUriLoader implements ModelLoader<Uri, InputStream> {
   private static final Set<String> SCHEMES =
       Collections.unmodifiableSet(new HashSet<>(Arrays.asList("http", "https")));
 
+  //实际类型为 HttpGlideUrlLoader
   private final ModelLoader<GlideUrl, InputStream> urlLoader;
 
   // Public API.
@@ -31,6 +32,8 @@ public class HttpUriLoader implements ModelLoader<Uri, InputStream> {
   @Override
   public LoadData<InputStream> buildLoadData(@NonNull Uri model, int width, int height,
       @NonNull Options options) {
+    //将 model(就是图片的 url) 封装为 GlideUrl 然后 调用 urlLoader 的  buildLoadData
+    //urlLoader类型为 HttpGlideUrlLoader ，其实就是调用 HttpGlideUrlLoader 的 buildLoadData 方法
     return urlLoader.buildLoadData(new GlideUrl(model.toString()), width, height, options);
   }
 
@@ -47,6 +50,8 @@ public class HttpUriLoader implements ModelLoader<Uri, InputStream> {
     @NonNull
     @Override
     public ModelLoader<Uri, InputStream> build(MultiModelLoaderFactory multiFactory) {
+      //multiFactory.build(GlideUrl.class, InputStream.class) 这句话会找你能处理 输入为 GlideUrl ，处理数据类型为 InputStream 的 ModelLoader ，
+      // 其实就是 HttpGlideUrlLoader 然后记录在 HttpUriLoader的 urlLoader 变量中
       return new HttpUriLoader(multiFactory.build(GlideUrl.class, InputStream.class));
     }
 

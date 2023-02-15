@@ -77,6 +77,7 @@ public class Registry {
   private final Pool<List<Throwable>> throwableListPool = FactoryPools.threadSafeList();
 
   public Registry() {
+    //创建 ModelLoaderRegistry
     this.modelLoaderRegistry = new ModelLoaderRegistry(throwableListPool);
     this.encoderRegistry = new EncoderRegistry();
     this.decoderRegistry = new ResourceDecoderRegistry();

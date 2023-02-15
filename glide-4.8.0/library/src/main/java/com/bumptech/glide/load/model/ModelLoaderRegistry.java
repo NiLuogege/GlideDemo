@@ -3,6 +3,7 @@ package com.bumptech.glide.load.model;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pools.Pool;
+import android.util.Log;
 import com.bumptech.glide.util.Synthetic;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,6 +23,7 @@ public class ModelLoaderRegistry {
   private final ModelLoaderCache cache = new ModelLoaderCache();
 
   public ModelLoaderRegistry(@NonNull Pool<List<Throwable>> throwableListPool) {
+    //创建一个 MultiModelLoaderFactory
     this(new MultiModelLoaderFactory(throwableListPool));
   }
 
@@ -74,6 +76,7 @@ public class ModelLoaderRegistry {
   public <A> List<ModelLoader<A, ?>> getModelLoaders(@NonNull A model) {
     //获取所有以 model 的Class开头注册的 ModelLoader
     List<ModelLoader<A, ?>> modelLoaders = getModelLoadersForClass(getClass(model));
+    Log.e("ModelLoaderRegistry","modelLoaders="+modelLoaders);
     int size = modelLoaders.size();
     boolean isEmpty = true;
     List<ModelLoader<A, ?>> filteredLoaders = Collections.emptyList();
@@ -103,12 +106,17 @@ public class ModelLoaderRegistry {
     return multiModelLoaderFactory.getDataClasses(modelClass);
   }
 
+  /**
+   * //获取所有以 model 的Class开头注册的 ModelLoader 这里会用工厂进行对象的创建
+   */
   @NonNull
   private synchronized <A> List<ModelLoader<A, ?>> getModelLoadersForClass(
       @NonNull Class<A> modelClass) {
     List<ModelLoader<A, ?>> loaders = cache.get(modelClass);
     if (loaders == null) {
+      //这里会构建具体的 ModelLoader 类
       loaders = Collections.unmodifiableList(multiModelLoaderFactory.build(modelClass));
+      //添加到缓存中
       cache.put(modelClass, loaders);
     }
     return loaders;

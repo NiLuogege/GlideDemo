@@ -82,6 +82,7 @@ public class StringLoader<Data> implements ModelLoader<String, Data> {
     @Override
     public ModelLoader<String, InputStream> build(
         @NonNull MultiModelLoaderFactory multiFactory) {
+      //这里会调用 MultiModelLoaderFactory 两个参数的 build 方法
       return new StringLoader<>(multiFactory.build(Uri.class, InputStream.class));
     }
 

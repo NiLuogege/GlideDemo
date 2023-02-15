@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.util.Pools.Pool;
+import android.util.Log;
 import com.bumptech.glide.Registry.NoModelLoaderAvailableException;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.util.Preconditions;
@@ -23,6 +24,7 @@ import java.util.Set;
 public class MultiModelLoaderFactory {
   private static final Factory DEFAULT_FACTORY = new Factory();
   private static final ModelLoader<Object, Object> EMPTY_MODEL_LOADER = new EmptyModelLoader();
+  //Glide 中注册到注册中心（Registry）的组件 最终会添加到这里来
   private final List<Entry<?, ?>> entries = new ArrayList<>();
   private final Factory factory;
   private final Set<Entry<?, ?>> alreadyUsedEntries = new HashSet<>();
@@ -92,6 +94,8 @@ public class MultiModelLoaderFactory {
   synchronized <Model> List<ModelLoader<Model, ?>> build(@NonNull Class<Model> modelClass) {
     try {
       List<ModelLoader<Model, ?>> loaders = new ArrayList<>();
+      Log.e("MultiModelLoaderFactory","entries="+entries);
+      //遍历 entries
       for (Entry<?, ?> entry : entries) {
         // Avoid stack overflow recursively creating model loaders by only creating loaders in
         // recursive requests if they haven't been created earlier in the chain. For example:
@@ -103,6 +107,7 @@ public class MultiModelLoaderFactory {
         }
         if (entry.handles(modelClass)) {
           alreadyUsedEntries.add(entry);
+          //调用 build 方法创建 具体的Model 并且添加到 loaders 中
           loaders.add(this.<Model, Object>build(entry));
           alreadyUsedEntries.remove(entry);
         }
@@ -125,8 +130,12 @@ public class MultiModelLoaderFactory {
     return result;
   }
 
+  /**
+   * 构建具体类型的 ModelLoader ，创建以后会赋值给 外部的 ModelLoader 比如 StringLoader的uriLoader  变量
+   */
   @NonNull
-  public synchronized <Model, Data> ModelLoader<Model, Data> build(@NonNull Class<Model> modelClass,
+  public synchronized <Model, Data> ModelLoader<Model, Data> build(
+      @NonNull Class<Model> modelClass,
       @NonNull Class<Data> dataClass) {
     try {
       List<ModelLoader<Model, Data>> loaders = new ArrayList<>();
@@ -141,15 +150,19 @@ public class MultiModelLoaderFactory {
           ignoredAnyEntries = true;
           continue;
         }
+        //找到真正能处理 这个输入数据类型为 modelClass ，处理数据为 dataClass 的 ModelLoader
         if (entry.handles(modelClass, dataClass)) {
           alreadyUsedEntries.add(entry);
+          //添加到 loaders 中
           loaders.add(this.<Model, Data>build(entry));
           alreadyUsedEntries.remove(entry);
         }
       }
       if (loaders.size() > 1) {
+        //如果有多个的话返回 MultiModelLoader
         return factory.build(loaders, throwableListPool);
       } else if (loaders.size() == 1) {
+        //一个的话就直接返回
         return loaders.get(0);
       } else {
         // Avoid crashing if recursion results in no loaders available. The assertion is supposed to
@@ -176,6 +189,7 @@ public class MultiModelLoaderFactory {
   @NonNull
   @SuppressWarnings("unchecked")
   private <Model, Data> ModelLoader<Model, Data> build(@NonNull Entry<?, ?> entry) {
+    //这里会调用 工厂类的 build 方法来创建真正的ModelLoader 类 ，例如 StringLoader.StreamFactory
     return (ModelLoader<Model, Data>) Preconditions.checkNotNull(entry.factory.build(this));
   }
 
@@ -204,6 +218,7 @@ public class MultiModelLoaderFactory {
     }
 
     public boolean handles(@NonNull Class<?> modelClass) {
+      //A  isAssignableFrom  B 标识 A 是否是 B的 父类或者相同
       return this.modelClass.isAssignableFrom(modelClass);
     }
   }

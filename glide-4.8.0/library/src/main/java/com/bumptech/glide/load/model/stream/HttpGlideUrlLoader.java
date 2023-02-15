@@ -52,6 +52,7 @@ public class HttpGlideUrlLoader implements ModelLoader<GlideUrl, InputStream> {
       }
     }
     int timeout = options.get(TIMEOUT);
+    //创建一个 LoadData 并返回
     return new LoadData<>(url, new HttpUrlFetcher(url, timeout));
   }
 
