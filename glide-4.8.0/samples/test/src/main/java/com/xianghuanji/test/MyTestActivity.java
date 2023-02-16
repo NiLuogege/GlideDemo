@@ -2,6 +2,7 @@ package com.xianghuanji.test;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
+import java.io.File;
 
 public class MyTestActivity extends Activity {
   @Override
@@ -77,6 +79,8 @@ public class MyTestActivity extends Activity {
       public void onClick(View v) {
         //普通 图片
         ImageView iv = findViewById(R.id.iv3);
+
+        File file = new File(Environment.getExternalStorageDirectory(), "test.jpg");
 
         Glide.with(MyTestActivity.this)
             .load(R.mipmap.tu1)

@@ -486,10 +486,12 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     stage = Stage.ENCODE;
     try {
       //对于加载网络图片来说是 false 所以不进这个 if
+      //对于本地图片（资源文件 or SD卡文件） 会进这个if
       Log.e(TAG, "deferredEncodeManager.hasResourceToEncode()=" + (deferredEncodeManager
           .hasResourceToEncode()));
       if (deferredEncodeManager.hasResourceToEncode()) {
 //        Log.e(TAG,"deferredEncodeManager.hasResourceToEncode()="+(deferredEncodeManager.hasResourceToEncode()));
+        //这里会对转换后的 图片进行缓存，也就是说 只有 本地图片（资源文件 or SD卡文件） 会缓存变换后的图片
         deferredEncodeManager.encode(diskCacheProvider, options);
       }
     } finally {
@@ -649,7 +651,6 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     // 也就是说网络图片默认不会 硬盘缓存变换后的图片
     if (diskCacheStrategy.isResourceCacheable(isFromAlternateCacheKey, dataSource,
         encodeStrategy)) {
-      Log.e(TAG,"到底进到这个里面了没? 没进来~~~");
       if (encoder == null) {
         throw new Registry.NoResultEncoderAvailableException(transformed.get().getClass());
       }
@@ -658,7 +659,8 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
         case SOURCE:
           key = new DataCacheKey(currentSourceKey, signature);
           break;
-        case TRANSFORMED:
+        case TRANSFORMED://应该是这个分支
+          //通过参数 构建一个 ResourceCacheKey
           key =
               new ResourceCacheKey(
                   decodeHelper.getArrayPool(),
@@ -674,8 +676,11 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
           throw new IllegalArgumentException("Unknown strategy: " + encodeStrategy);
       }
 
+      //创建 or 获取一个 LockedResource
       LockedResource<Z> lockedResult = LockedResource.obtain(transformed);
+      //初始化
       deferredEncodeManager.init(key, encoder, lockedResult);
+      //对 result 从新赋值
       result = lockedResult;
     }
     //返回经过转换的 BitmapResource
@@ -761,6 +766,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     void encode(DiskCacheProvider diskCacheProvider, Options options) {
       GlideTrace.beginSection("DecodeJob.encode");
       try {
+        //磁盘缓存变换后的图片
         diskCacheProvider.getDiskCache().put(key,
             new DataCacheWriter<>(encoder, toEncode, options));
       } finally {
