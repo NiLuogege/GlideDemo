@@ -41,8 +41,10 @@ public class LoadPath<Data, ResourceType, Transcode> {
   ) throws GlideException {
     List<Throwable> throwables = Preconditions.checkNotNull(listPool.acquire());
     try {
+      //会返回一个 LazyBitmapDrawableResource 里面包含了 经过转换后的 BitmapResource
       return loadWithExceptionList(rewinder, options, width, height, decodeCallback, throwables);
     } finally {
+      //释放
       listPool.release(throwables);
     }
   }
@@ -61,6 +63,7 @@ public class LoadPath<Data, ResourceType, Transcode> {
     for (int i = 0, size = decodePaths.size(); i < size; i++) {
       DecodePath<Data, ResourceType, Transcode> path = decodePaths.get(i);
       try {
+        // 会返回一个 LazyBitmapDrawableResource 对象，这个流程中会解码出一个符合要求尺寸（ImageView大小或者指定大小）的Bitmap ，然后进行变换 会生成一个新的 Bitmap
         result = path.decode(rewinder, width, height, options, decodeCallback);
       } catch (GlideException e) {
         exceptions.add(e);

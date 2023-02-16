@@ -17,7 +17,7 @@ import com.bumptech.glide.util.Preconditions;
  * android.graphics.Bitmap}s into {@link android.graphics.drawable.BitmapDrawable}s.
  */
 public class BitmapDrawableTranscoder implements ResourceTranscoder<Bitmap, BitmapDrawable> {
-  private final Resources resources;
+  private final Resources resources;//resources 为 android中的 Resources 对象
 
   // Public API.
   @SuppressWarnings("unused")
@@ -40,8 +40,9 @@ public class BitmapDrawableTranscoder implements ResourceTranscoder<Bitmap, Bitm
 
   @Nullable
   @Override
-  public Resource<BitmapDrawable> transcode(@NonNull Resource<Bitmap> toTranscode,
+  public Resource<BitmapDrawable> transcode(@NonNull Resource<Bitmap> toTranscode,//为 BitmapResource 类型，是变换后的
       @NonNull Options options) {
+    //resources 为 android中的 Resources 对象
     return LazyBitmapDrawableResource.obtain(resources, toTranscode);
   }
 }

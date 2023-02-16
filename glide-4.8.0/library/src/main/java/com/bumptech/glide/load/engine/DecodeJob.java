@@ -56,7 +56,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   private EngineKey loadKey;
   private int width;
   private int height;
-  private DiskCacheStrategy diskCacheStrategy;
+  private DiskCacheStrategy diskCacheStrategy;//硬盘缓存策略 默认为 DiskCacheStrategy.AUTOMATIC
   private Options options;
   private Callback<R> callback;//解码的回调，是 EngineJob 对象，当图片解码完毕后会 调用 onResourceReady ， onLoadFailed 等方法
   private int order;
@@ -341,8 +341,12 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     onLoadFailed();
   }
 
-  private void notifyComplete(Resource<R> resource, DataSource dataSource) {
+  private void notifyComplete(
+      Resource<R> resource, //在加载网络图片流程中，为LazyBitmapDrawableResource 里面包含了 经过转换后的 BitmapResource
+      DataSource dataSource//对于加载网络图片来说是 DataSource.DATA_DISK_CACHE
+  ) {
     setNotifiedOrThrow();
+    //callback 为 EngineJob，调用到 EngineJob.onResourceReady
     callback.onResourceReady(resource, dataSource);
   }
 
@@ -445,35 +449,43 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     }
     Resource<R> resource = null;
     try {
-      //开始解码
+      //开始解码 会返回一个 LazyBitmapDrawableResource 里面包含了 经过转换后的 BitmapResource
       resource = decodeFromData(currentFetcher, currentData, currentDataSource);
     } catch (GlideException e) {
       e.setLoggingDetails(currentAttemptingKey, currentDataSource);
       throwables.add(e);
     }
     if (resource != null) {
+      //开始编码和释放资源
       notifyEncodeAndRelease(resource, currentDataSource);
     } else {
       runGenerators();
     }
   }
 
-  private void notifyEncodeAndRelease(Resource<R> resource, DataSource dataSource) {
+  private void notifyEncodeAndRelease(
+      Resource<R> resource,//在加载网络图片流程中，为LazyBitmapDrawableResource 里面包含了 经过转换后的 BitmapResource
+      DataSource dataSource//对于加载网络图片来说是 DataSource.DATA_DISK_CACHE
+  ) {
     if (resource instanceof Initializable) {
       ((Initializable) resource).initialize();
     }
 
     Resource<R> result = resource;
     LockedResource<R> lockedResource = null;
+    //对于加载网络图片来说是 false 所以不进这个 if
     if (deferredEncodeManager.hasResourceToEncode()) {
       lockedResource = LockedResource.obtain(resource);
       result = lockedResource;
     }
 
+    //告诉回调 资源加载完成了
     notifyComplete(result, dataSource);
 
+    //
     stage = Stage.ENCODE;
     try {
+      //对于加载网络图片来说是 false 所以不进这个 if
       if (deferredEncodeManager.hasResourceToEncode()) {
         deferredEncodeManager.encode(diskCacheProvider, options);
       }
@@ -497,7 +509,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
         return null;
       }
       long startTime = LogTime.getLogTime();
-      //解码
+      //解码 会返回一个 LazyBitmapDrawableResource 里面包含了 经过转换后的 BitmapResource
       Resource<R> result = decodeFromFetcher(data, dataSource);
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         logWithTimeAndKey("Decoded result " + result, startTime);
@@ -522,6 +534,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     //	DecodePath{ dataClass=class java.nio.DirectByteBuffer, decoders=[com.bumptech.glide.load.resource.bitmap.BitmapDrawableDecoder@1b12f9f], transcoder=com.bumptech.glide.load.resource.transcode.UnitTranscoder@e1180c0}]}
     LoadPath<Data, ?, R> path = decodeHelper.getLoadPath((Class<Data>) data.getClass());
     Log.e(TAG,"path="+path);
+    //会返回一个 LazyBitmapDrawableResource 里面包含了 经过转换后的 BitmapResource
     return runLoadPath(data, dataSource, path);
   }
 
@@ -560,6 +573,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     DataRewinder<Data> rewinder = glideContext.getRegistry().getRewinder(data);
     try {
       // ResourceType in DecodeCallback below is required for compilation to work with gradle.
+      //会返回一个 LazyBitmapDrawableResource 里面包含了 经过转换后的 BitmapResource
       return path.load(
           rewinder, options, width, height, new DecodeCallback<ResourceType>(dataSource));
     } finally {
@@ -613,8 +627,11 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     final ResourceEncoder<Z> encoder;
     //判断是否存在 针对 BitmapResource 的编码器
     if (decodeHelper.isResourceEncoderAvailable(transformed)) {
+      //对于加载网络图片来说是 com.bumptech.glide.load.resource.bitmap.BitmapEncoder
       encoder = decodeHelper.getResultEncoder(transformed);
       Log.e(TAG,"encoder="+encoder);
+
+      //BitmapEncoder 返回的是 EncodeStrategy.TRANSFORMED
       encodeStrategy = encoder.getEncodeStrategy(options);
     } else {
       encoder = null;
@@ -622,7 +639,9 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     }
 
     Resource<Z> result = transformed;
+    //对于获取网络图片来说  currentSourceKey 是 GlideUrl , isFromAlternateCacheKey 为 false
     boolean isFromAlternateCacheKey = !decodeHelper.isSourceKey(currentSourceKey);
+    //默认为 DiskCacheStrategy.AUTOMATIC 因为 isFromAlternateCacheKey = false这个 if 整体返回为 false 所以不进入这个 if
     if (diskCacheStrategy.isResourceCacheable(isFromAlternateCacheKey, dataSource,
         encodeStrategy)) {
       if (encoder == null) {
@@ -653,6 +672,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       deferredEncodeManager.init(key, encoder, lockedResult);
       result = lockedResult;
     }
+    //返回经过转换的 BitmapResource
     return result;
   }
 
@@ -808,6 +828,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     SOURCE,
     /**
      * Encoding transformed resources after a successful load.
+     * //编码
      */
     ENCODE,
     /**

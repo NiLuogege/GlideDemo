@@ -32,12 +32,18 @@ public class DecodePath<DataType, ResourceType, Transcode> {
       Class<Transcode> transcodeClass,
       List<? extends ResourceDecoder<DataType, ResourceType>> decoders,
       ResourceTranscoder<ResourceType, Transcode> transcoder, Pool<List<Throwable>> listPool) {
-    this.dataClass = dataClass;
-    this.decoders = decoders;
-    this.transcoder = transcoder;
-    this.listPool = listPool;
+    this.dataClass = dataClass;//对于加载网络图片来说 ByteBuffer
+    this.decoders = decoders;//对于加载网络图片来说 ByteBufferBitmapDecoder
+    this.transcoder = transcoder;//对于加载网络图片来说 BitmapDrawableTranscoder
+    this.listPool = listPool;//对于加载网络图片来说 FactoryPools$FactoryPool
     failureMessage = "Failed DecodePath{" + dataClass.getSimpleName() + "->"
         + resourceClass.getSimpleName() + "->" + transcodeClass.getSimpleName() + "}";
+
+//    Log.e(TAG,"dataClass="+dataClass+""
+//        + " decoders="+decoders
+//        + " transcoder="+transcoder
+//        + " listPool="+listPool
+//    );
   }
 
   public Resource<Transcode> decode(DataRewinder<DataType> rewinder, int width, int height,
@@ -45,8 +51,9 @@ public class DecodePath<DataType, ResourceType, Transcode> {
   ) throws GlideException {
     // 对于加载网络图片来说 返回一个具体类型为 BitmapResource ，里面包含了 一个 Bitmap
     Resource<ResourceType> decoded = decodeResource(rewinder, width, height, options);
-    //callback 为 DecodeJob 中创建的 DecodeCallback, 所以会调用到 DecodeJob 的 onResourceDecoded
+    //callback 为 DecodeJob 中创建的 DecodeCallback, 所以会调用到 DecodeJob 的 onResourceDecoded 这里面会对 图片进行 转换 （CenterCrop ,黑白化 等）
     Resource<ResourceType> transformed = callback.onResourceDecoded(decoded);
+    //对于加载网络图片来说 BitmapDrawableTranscoder 回到用他的 transcode 方法 ，会返回一个 LazyBitmapDrawableResource
     return transcoder.transcode(transformed, options);
   }
 
