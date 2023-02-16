@@ -8,6 +8,8 @@ import com.bumptech.glide.load.engine.Resource;
  * cache).
  *
  * @param <T> The type of the data contained by the resource.
+ *
+ * 用于将 T 类型写到缓存里 一般 T类型为 InputStream、ByteBuffer、Resource<T> 等
  */
 public interface ResourceEncoder<T> extends Encoder<Resource<T>> {
   // specializing the generic arguments

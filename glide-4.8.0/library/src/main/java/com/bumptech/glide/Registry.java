@@ -492,6 +492,13 @@ public class Registry {
     return this;
   }
 
+  /**
+   *
+   getLoadPath()入参类型为<Data, TResource, Transcode>，
+   其中<Data>是在getModelLoaders()返回的类型，例如InputStream或者ByteBuffer，
+   <TResource>是待定类型，调用者一般传?,<Transcode>为调用Glide.with().as(xxx)时as()传入的类型，
+   Glide提供有asBitmap(),asFile(),asGif()，默认是Drawable类型；在调用时<TResource>是待定类型
+   */
   @Nullable
   public <Data, TResource, Transcode> LoadPath<Data, TResource, Transcode> getLoadPath(
       @NonNull Class<Data> dataClass, @NonNull Class<TResource> resourceClass,
@@ -522,26 +529,32 @@ public class Registry {
       @NonNull Class<Data> dataClass, @NonNull Class<TResource> resourceClass,
       @NonNull Class<Transcode> transcodeClass) {
     List<DecodePath<Data, TResource, Transcode>> decodePaths = new ArrayList<>();
+    //获取所有dataClass对应的ResourceClasses
     List<Class<TResource>> registeredResourceClasses =
         decoderRegistry.getResourceClasses(dataClass, resourceClass);
-
+    //遍历registeredResourceClass
     for (Class<TResource> registeredResourceClass : registeredResourceClasses) {
+      //获取所有的registeredResourceClass对应的registeredTranscodeClasses
       List<Class<Transcode>> registeredTranscodeClasses =
           transcoderRegistry.getTranscodeClasses(registeredResourceClass, transcodeClass);
-
+      //遍历registeredTranscodeClasses
       for (Class<Transcode> registeredTranscodeClass : registeredTranscodeClasses) {
-
+        //获取dataClass和registeredResourceClass对应的所有ResourceDecoder
         List<ResourceDecoder<Data, TResource>> decoders =
             decoderRegistry.getDecoders(dataClass, registeredResourceClass);
+        //获取registeredResourceClass和registeredTranscodeClasss对应的所有ResourceTranscoder
         ResourceTranscoder<TResource, Transcode> transcoder =
             transcoderRegistry.get(registeredResourceClass, registeredTranscodeClass);
         @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+        //创建DecodePath,把相关信息封装
         DecodePath<Data, TResource, Transcode> path =
             new DecodePath<>(dataClass, registeredResourceClass, registeredTranscodeClass,
                 decoders, transcoder, throwableListPool);
+        //添加进集合
         decodePaths.add(path);
       }
     }
+    //返回集合
     return decodePaths;
   }
 

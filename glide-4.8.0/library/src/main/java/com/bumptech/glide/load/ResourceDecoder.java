@@ -10,6 +10,8 @@ import java.io.IOException;
  *
  * @param <T> The type the resource will be decoded from (File, InputStream etc).
  * @param <Z> The type of the decoded resource (Bitmap, Drawable etc).
+ *
+ * 泛型解析：T表示输入类型一般为File，InputStream或者ByteBuffer，Z表示输出类型，一般为Bitmap和Drawable
  */
 public interface ResourceDecoder<T, Z> {
 

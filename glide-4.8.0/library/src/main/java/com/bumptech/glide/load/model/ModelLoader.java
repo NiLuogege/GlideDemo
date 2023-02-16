@@ -31,6 +31,12 @@ import java.util.List;
  * @param <Model> The type of the model.
  * @param <Data>  The type of the data that can be used by a
  * {@link com.bumptech.glide.load.ResourceDecoder} to decode a resource.
+ *
+ * 主要工作是将复杂数据模型转通过DataFetcher转换成需要的Data
+ *
+ *              泛型<Model,Data>接受的范围，Model代表用户输入的类型，理论上可以用任意数据类型，
+ *              主要的输入点在Glide.with().load(model)； Data理论上也可以是任意数据类型，
+ *              但基于后续流程的支持，一般都是File,InputStream和ByteBuffer;
  */
 public interface ModelLoader<Model, Data> {
 

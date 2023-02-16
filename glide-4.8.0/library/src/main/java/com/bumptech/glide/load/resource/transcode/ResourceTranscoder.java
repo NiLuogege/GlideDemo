@@ -10,6 +10,8 @@ import com.bumptech.glide.load.engine.Resource;
  *
  * @param <Z> The type of the resource that will be transcoded from.
  * @param <R> The type of the resource that will be transcoded to.
+ *
+ * 用于将资源 Z 转为为 资源 R 可以已 BitmapBytesTranscoder 为例
  */
 public interface ResourceTranscoder<Z, R> {
 
