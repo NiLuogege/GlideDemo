@@ -33,6 +33,7 @@ final class DecodeHelper<Transcode> {
   private Class<?> resourceClass;
   private DecodeJob.DiskCacheProvider diskCacheProvider;
   private Options options;
+  // 用于转换 ，一般是有值得
   private Map<Class<?>, Transformation<?>> transformations;
   private Class<Transcode> transcodeClass;
   private boolean isLoadDataSet;
@@ -153,11 +154,17 @@ final class DecodeHelper<Transcode> {
     return isScaleOnlyOrNoTransform;
   }
 
+  /**
+   * 从这里可以看到 对同一种 数据类型的变换只能存在一个 
+   */
   @SuppressWarnings("unchecked")
   <Z> Transformation<Z> getTransformation(Class<Z> resourceClass) {
+    //获取可以处理 resourceClass 这种类型的 Transformation
+    //对于加载网络图片来说是 Class<Bitmap>
     Transformation<Z> result = (Transformation<Z>) transformations.get(resourceClass);
     if (result == null) {
       for (Entry<Class<?>, Transformation<?>> entry : transformations.entrySet()) {
+        //如果没有找到 就看这个 Transformation 是否是能处理它 父类的
         if (entry.getKey().isAssignableFrom(resourceClass)) {
           result = (Transformation<Z>) entry.getValue();
           break;

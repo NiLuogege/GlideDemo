@@ -583,6 +583,9 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     return stateVerifier;
   }
 
+  /**
+   * 这个方法中会对图片做 变换操作，比如圆角，黑白化 等
+   */
   @Synthetic
   @NonNull
   <Z> Resource<Z> onResourceDecoded(
@@ -590,15 +593,19 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       @NonNull Resource<Z> decoded//对于加载网络图片来说 返回一个具体类型为 BitmapResource
   ) {
     @SuppressWarnings("unchecked")
+    //对于加载网络图片来说是 Class<Bitmap>
     Class<Z> resourceSubClass = (Class<Z>) decoded.get().getClass();
     Transformation<Z> appliedTransformation = null;
     Resource<Z> transformed = decoded;
     if (dataSource != DataSource.RESOURCE_DISK_CACHE) {
+      //获取匹配的 变换操作 ,对于加载网络图片来说 默认是 FitCenter 继承自 BitmapTransformation
       appliedTransformation = decodeHelper.getTransformation(resourceSubClass);
+      //执行他的 transform 操作 返回转换后的 BitmapResource
       transformed = appliedTransformation.transform(glideContext, decoded, width, height);
     }
     // TODO: Make this the responsibility of the Transformation.
     if (!decoded.equals(transformed)) {
+      //这里将原始 的 BitmapResource 进行回收，因为下面就要使用 转换过得了
       decoded.recycle();
     }
 

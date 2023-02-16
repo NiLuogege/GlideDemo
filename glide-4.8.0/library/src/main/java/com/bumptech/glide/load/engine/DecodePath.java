@@ -45,7 +45,7 @@ public class DecodePath<DataType, ResourceType, Transcode> {
   ) throws GlideException {
     // 对于加载网络图片来说 返回一个具体类型为 BitmapResource ，里面包含了 一个 Bitmap
     Resource<ResourceType> decoded = decodeResource(rewinder, width, height, options);
-    //callback 为 DecodeJob 中创建的 DecodeCallback, 所以会调用到 DecodeCallback的onResourceDecoded
+    //callback 为 DecodeJob 中创建的 DecodeCallback, 所以会调用到 DecodeJob 的 onResourceDecoded
     Resource<ResourceType> transformed = callback.onResourceDecoded(decoded);
     return transcoder.transcode(transformed, options);
   }
