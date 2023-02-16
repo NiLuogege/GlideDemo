@@ -611,8 +611,10 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
     final EncodeStrategy encodeStrategy;
     final ResourceEncoder<Z> encoder;
+    //判断是否存在 针对 BitmapResource 的编码器
     if (decodeHelper.isResourceEncoderAvailable(transformed)) {
       encoder = decodeHelper.getResultEncoder(transformed);
+      Log.e(TAG,"encoder="+encoder);
       encodeStrategy = encoder.getEncodeStrategy(options);
     } else {
       encoder = null;

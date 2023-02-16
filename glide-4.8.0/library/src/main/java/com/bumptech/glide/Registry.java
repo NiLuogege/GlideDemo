@@ -570,6 +570,7 @@ public class Registry {
   }
 
   public boolean isResourceEncoderAvailable(@NonNull Resource<?> resource) {
+    //BitmapResource 的getResourceClass 方法返回为 Bitmap
     return resourceEncoderRegistry.get(resource.getResourceClass()) != null;
   }
 
