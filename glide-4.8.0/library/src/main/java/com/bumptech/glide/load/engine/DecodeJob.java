@@ -407,7 +407,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     this.currentDataSource = dataSource;
     this.currentAttemptingKey = attemptedKey;
 
-    Log.e(TAG,"线程是否相同="+(Thread.currentThread() != currentThread));
+    Log.e(TAG, "线程是否相同=" + (Thread.currentThread() != currentThread));
     //一般为 false
     if (Thread.currentThread() != currentThread) {
       //设置 runReason 为 RunReason.DECODE_DATA;
@@ -486,7 +486,10 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     stage = Stage.ENCODE;
     try {
       //对于加载网络图片来说是 false 所以不进这个 if
+      Log.e(TAG, "deferredEncodeManager.hasResourceToEncode()=" + (deferredEncodeManager
+          .hasResourceToEncode()));
       if (deferredEncodeManager.hasResourceToEncode()) {
+//        Log.e(TAG,"deferredEncodeManager.hasResourceToEncode()="+(deferredEncodeManager.hasResourceToEncode()));
         deferredEncodeManager.encode(diskCacheProvider, options);
       }
     } finally {
@@ -533,7 +536,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     //	DecodePath{ dataClass=class java.nio.DirectByteBuffer, decoders=[com.bumptech.glide.load.resource.bitmap.ByteBufferBitmapDecoder@72e81f9], transcoder=com.bumptech.glide.load.resource.transcode.BitmapDrawableTranscoder@9fd653e},
     //	DecodePath{ dataClass=class java.nio.DirectByteBuffer, decoders=[com.bumptech.glide.load.resource.bitmap.BitmapDrawableDecoder@1b12f9f], transcoder=com.bumptech.glide.load.resource.transcode.UnitTranscoder@e1180c0}]}
     LoadPath<Data, ?, R> path = decodeHelper.getLoadPath((Class<Data>) data.getClass());
-    Log.e(TAG,"path="+path);
+    Log.e(TAG, "path=" + path);
     //会返回一个 LazyBitmapDrawableResource 里面包含了 经过转换后的 BitmapResource
     return runLoadPath(data, dataSource, path);
   }
@@ -608,7 +611,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   ) {
     @SuppressWarnings("unchecked")
     //对于加载网络图片来说是 Class<Bitmap>
-    Class<Z> resourceSubClass = (Class<Z>) decoded.get().getClass();
+        Class<Z> resourceSubClass = (Class<Z>) decoded.get().getClass();
     Transformation<Z> appliedTransformation = null;
     Resource<Z> transformed = decoded;
     if (dataSource != DataSource.RESOURCE_DISK_CACHE) {
@@ -629,7 +632,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     if (decodeHelper.isResourceEncoderAvailable(transformed)) {
       //对于加载网络图片来说是 com.bumptech.glide.load.resource.bitmap.BitmapEncoder
       encoder = decodeHelper.getResultEncoder(transformed);
-      Log.e(TAG,"encoder="+encoder);
+      Log.e(TAG, "encoder=" + encoder);
 
       //BitmapEncoder 返回的是 EncodeStrategy.TRANSFORMED
       encodeStrategy = encoder.getEncodeStrategy(options);
@@ -687,7 +690,8 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
     @NonNull
     @Override
-    public Resource<Z> onResourceDecoded(@NonNull Resource<Z> decoded//对于加载网络图片来说 返回一个具体类型为 BitmapResource
+    public Resource<Z> onResourceDecoded(@NonNull Resource<Z> decoded
+//对于加载网络图片来说 返回一个具体类型为 BitmapResource
     ) {
       //会调用到 本文件中的 onResourceDecoded 方法
       return DecodeJob.this.onResourceDecoded(dataSource, decoded);

@@ -30,7 +30,8 @@ final class LockedResource<Z> implements Resource<Z>,
 
   @SuppressWarnings("unchecked")
   @NonNull
-  static <Z> LockedResource<Z> obtain(Resource<Z> resource) {
+  static <Z> LockedResource<Z> obtain(Resource<Z> resource//变换过的 BitmapResource
+  ) {
     LockedResource<Z> result = Preconditions.checkNotNull((LockedResource<Z>) POOL.acquire());
     result.init(resource);
     return result;

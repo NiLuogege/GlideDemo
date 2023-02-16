@@ -238,9 +238,10 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
       }
     }
     // Our request is complete, so we can release the resource.
-    //释放资源啦
+    //释放资源啦，调用到 EngineResource 的 release
     engineResource.release();
 
+    //释放无用资源啦
     release(false /*isRemovedFromQueue*/);
   }
 
@@ -254,7 +255,8 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     release(false /*isRemovedFromQueue*/);
   }
 
-  private void release(boolean isRemovedFromQueue) {
+  private void release(boolean isRemovedFromQueue//为false
+  ) {
     Util.assertMainThread();
     cbs.clear();
     key = null;
