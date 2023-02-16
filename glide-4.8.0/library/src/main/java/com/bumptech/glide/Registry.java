@@ -46,19 +46,19 @@ public class Registry {
   private static final String BUCKET_APPEND_ALL = "legacy_append";
 
   /**
-   * 数据加载模块
+   * 注册ModelLoader 数据加载模块
    */
   private final ModelLoaderRegistry modelLoaderRegistry;
   /**
-   * 编码存储模块，提供将数据持久化存储到磁盘文件中的功能
+   * 注册Encoder 编码存储模块，提供将数据持久化存储到磁盘文件中的功能
    */
   private final EncoderRegistry encoderRegistry;
   /**
-   * 解码模块，能够将各种类型数据，例如文件、byte数组等数据解码成bitmap或者drawable等资源
+   * 注册ResourceDecoder 解码模块，能够将各种类型数据，例如文件、byte数组等数据解码成bitmap或者drawable等资源
    */
   private final ResourceDecoderRegistry decoderRegistry;
   /**
-   * 编码存储模块，提供将bitmap或者drawable等资源文件进行持久化存储的功能
+   * 注册ResourceEncoder 编码存储模块，提供将bitmap或者drawable等资源文件进行持久化存储的功能
    */
   private final ResourceEncoderRegistry resourceEncoderRegistry;
   /**
@@ -69,6 +69,9 @@ public class Registry {
    * 类型转换模块，提供将不同资源类型进行转换的能力，例如将bitmap转成drawable等
    */
   private final TranscoderRegistry transcoderRegistry;
+  /**
+   * 图片头解析
+   */
   private final ImageHeaderParserRegistry imageHeaderParserRegistry;
 
   private final ModelToResourceClassCache modelToResourceClassCache =
