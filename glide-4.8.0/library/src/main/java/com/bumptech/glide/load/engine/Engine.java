@@ -34,7 +34,7 @@ public class Engine implements EngineJobListener,
   private static final String TAG = "Engine";
   private static final int JOB_POOL_SIZE = 150;
   private static final boolean VERBOSE_IS_LOGGABLE = Log.isLoggable(TAG, Log.VERBOSE);
-  private final Jobs jobs;
+  private final Jobs jobs;//默认为 Jobs 类
   private final EngineKeyFactory keyFactory;
   //内存缓存 默认为 LruResourceCache
   private final MemoryCache cache;
@@ -320,17 +320,24 @@ public class Engine implements EngineJobListener,
 
   @SuppressWarnings("unchecked")
   @Override
-  public void onEngineJobComplete(EngineJob<?> engineJob, Key key, EngineResource<?> resource) {
+  public void onEngineJobComplete(
+      EngineJob<?> engineJob,
+      Key key,//这次请求的 key 是一个 EngineKey
+      EngineResource<?> resource//EngineResource 里面包含了 真正的图片位
+  ) {
     Util.assertMainThread();
     // A null resource indicates that the load failed, usually due to an exception.
     if (resource != null) {
+      //有添加监听为Engine 类
       resource.setResourceListener(key, this);
 
+      //一般是true
       if (resource.isCacheable()) {
+        //加入到 activeEngineResources 这个最近使用资源的 缓存中 是一个 HashMap 弱引用了 resource
         activeResources.activate(key, resource);
       }
     }
-
+    //移除缓存的 engineJob
     jobs.removeIfCurrent(key, engineJob);
   }
 
@@ -484,7 +491,7 @@ public class Engine implements EngineJobListener,
     @Synthetic final GlideExecutor sourceExecutor;
     @Synthetic final GlideExecutor sourceUnlimitedExecutor;
     @Synthetic final GlideExecutor animationExecutor;
-    @Synthetic final EngineJobListener listener;
+    @Synthetic final EngineJobListener listener;// 为Engine类
     //一个 EngineJob 的池子
     @Synthetic final Pools.Pool<EngineJob<?>> pool =
         FactoryPools.simple(
@@ -507,7 +514,8 @@ public class Engine implements EngineJobListener,
         GlideExecutor sourceExecutor,
         GlideExecutor sourceUnlimitedExecutor,
         GlideExecutor animationExecutor,
-        EngineJobListener listener) {
+        EngineJobListener listener // 为Engine类
+    ) {
       this.diskCacheExecutor = diskCacheExecutor;
       this.sourceExecutor = sourceExecutor;
       this.sourceUnlimitedExecutor = sourceUnlimitedExecutor;
@@ -525,7 +533,7 @@ public class Engine implements EngineJobListener,
 
     @SuppressWarnings("unchecked")
     <R> EngineJob<R> build(
-        Key key,//这次请求的 key
+        Key key,//这次请求的 key 是一个 EngineKey
         boolean isMemoryCacheable,//是否使用内存缓存，一般为 true
         boolean useUnlimitedSourceGeneratorPool,//使用没有限制的线程池， 默认为false
         boolean useAnimationPool,//默认为false

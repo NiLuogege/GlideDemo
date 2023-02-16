@@ -20,11 +20,14 @@ final class Jobs {
   }
 
   void put(Key key, EngineJob<?> job) {
+    //进行缓存 ，expected.onlyRetrieveFromCache() 默认为 false ,所以一般缓存到 jobs 中
     getJobMap(job.onlyRetrieveFromCache()).put(key, job);
   }
 
   void removeIfCurrent(Key key, EngineJob<?> expected) {
+    //expected.onlyRetrieveFromCache() 默认为 false ,所以 getJobMap 返回为 jobs
     Map<Key, EngineJob<?>> jobMap = getJobMap(expected.onlyRetrieveFromCache());
+    //如果有相同的key 进行 remove
     if (expected.equals(jobMap.get(key))) {
       jobMap.remove(key);
     }

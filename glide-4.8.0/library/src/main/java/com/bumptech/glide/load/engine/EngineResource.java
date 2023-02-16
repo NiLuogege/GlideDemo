@@ -14,9 +14,9 @@ import com.bumptech.glide.util.Preconditions;
 class EngineResource<Z> implements Resource<Z> {
   private final boolean isCacheable;
   private final boolean isRecyclable;
-  private ResourceListener listener;
+  private ResourceListener listener;//为Engine 类
   private Key key;
-  private int acquired;
+  private int acquired;//用来标记当前资源 被使用的个数（相同的图片可以显示到多个ImageView上），一般只有在  acquired 为 0的时候才能去回收资源
   private boolean isRecycled;
   private final Resource<Z> resource;
 
@@ -24,7 +24,11 @@ class EngineResource<Z> implements Resource<Z> {
     void onResourceReleased(Key key, EngineResource<?> resource);
   }
 
-  EngineResource(Resource<Z> toWrap, boolean isCacheable, boolean isRecyclable) {
+  EngineResource(
+      Resource<Z> toWrap,//在加载网络图片流程中，为LazyBitmapDrawableResource 里面包含了 经过转换后的 BitmapResource
+      boolean isCacheable, //内存缓存是否可用，默认为true
+      boolean isRecyclable//一般为 true
+  ) {
     resource = Preconditions.checkNotNull(toWrap);
     this.isCacheable = isCacheable;
     this.isRecyclable = isRecyclable;

@@ -36,20 +36,20 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
   private final List<ResourceCallback> cbs = new ArrayList<>(2);
   private final StateVerifier stateVerifier = StateVerifier.newInstance();
   private final Pools.Pool<EngineJob<?>> pool;
-  private final EngineResourceFactory engineResourceFactory;
+  private final EngineResourceFactory engineResourceFactory;//默认为 当前类的 DEFAULT_FACTORY 对象
   private final EngineJobListener listener;
   private final GlideExecutor diskCacheExecutor;
   private final GlideExecutor sourceExecutor;
   private final GlideExecutor sourceUnlimitedExecutor;
   private final GlideExecutor animationExecutor;
 
-  private Key key;//这次请求的 key
+  private Key key;//这次请求的 key 是一个 EngineKey
   private boolean isCacheable;//是否使用内存缓存，一般为 true
   private boolean useUnlimitedSourceGeneratorPool;//使用没有限制的线程池， 默认为false
   private boolean useAnimationPool;//默认为false
   private boolean onlyRetrieveFromCache;//只在内存中获取 ，默认为 false
-  private Resource<?> resource;
-  private DataSource dataSource;
+  private Resource<?> resource; //在加载网络图片流程中，为LazyBitmapDrawableResource 里面包含了 经过转换后的 BitmapResource
+  private DataSource dataSource;//对于加载网络图片来说是 DataSource.DATA_DISK_CACHE
   private boolean hasResource;
   private GlideException exception;
   private boolean hasLoadFailed;
@@ -67,7 +67,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
       GlideExecutor sourceExecutor,
       GlideExecutor sourceUnlimitedExecutor,
       GlideExecutor animationExecutor,
-      EngineJobListener listener,
+      EngineJobListener listener,// 为Engine类
       Pools.Pool<EngineJob<?>> pool) {
     this(
         diskCacheExecutor,
@@ -85,7 +85,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
       GlideExecutor sourceExecutor,
       GlideExecutor sourceUnlimitedExecutor,
       GlideExecutor animationExecutor,
-      EngineJobListener listener,
+      EngineJobListener listener,// 为Engine类
       Pools.Pool<EngineJob<?>> pool,
       EngineResourceFactory engineResourceFactory) {
     this.diskCacheExecutor = diskCacheExecutor;
@@ -99,7 +99,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
 
   @VisibleForTesting
   EngineJob<R> init(
-      Key key,//这次请求的 key
+      Key key,//这次请求的 key 是一个 EngineKey
       boolean isCacheable,//是否使用内存缓存，一般为 true
       boolean useUnlimitedSourceGeneratorPool,//使用没有限制的线程池， 默认为false
       boolean useAnimationPool,//默认为false
@@ -207,12 +207,16 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     } else if (hasResource) {
       throw new IllegalStateException("Already have resource");
     }
+    //会创建一个 EngineResource 然后将 resource 和 isCacheable 记录起来
     engineResource = engineResourceFactory.build(resource, isCacheable);
     hasResource = true;
 
     // Hold on to resource for duration of request so we don't recycle it in the middle of
     // notifying if it synchronously released by one of the callbacks.
+    //增加engineResource 的使用数量
     engineResource.acquire();
+
+    //listener 为 Engine 类 ,调用到 Engine.onEngineJobComplete
     listener.onEngineJobComplete(this, key, engineResource);
 
     //noinspection ForLoopReplaceableByForEach to improve perf
@@ -259,9 +263,13 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
   }
 
   @Override
-  public void onResourceReady(Resource<R> resource, DataSource dataSource) {
+  public void onResourceReady(
+      Resource<R> resource, //在加载网络图片流程中，为LazyBitmapDrawableResource 里面包含了 经过转换后的 BitmapResource
+      DataSource dataSource//对于加载网络图片来说是 DataSource.DATA_DISK_CACHE
+  ) {
     this.resource = resource;
     this.dataSource = dataSource;
+    //这里会切换到主线程 去handleMessage方法中看
     MAIN_THREAD_HANDLER.obtainMessage(MSG_COMPLETE, this).sendToTarget();
   }
 
@@ -311,7 +319,10 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
 
   @VisibleForTesting
   static class EngineResourceFactory {
-    public <R> EngineResource<R> build(Resource<R> resource, boolean isMemoryCacheable) {
+    public <R> EngineResource<R> build(
+        Resource<R> resource, //在加载网络图片流程中，为LazyBitmapDrawableResource 里面包含了 经过转换后的 BitmapResource
+        boolean isMemoryCacheable//内存缓存是否可用，默认为true
+    ) {
       return new EngineResource<>(resource, isMemoryCacheable, /*isRecyclable=*/ true);
     }
   }
@@ -326,7 +337,8 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     public boolean handleMessage(Message message) {
       EngineJob<?> job = (EngineJob<?>) message.obj;
       switch (message.what) {
-        case MSG_COMPLETE:
+        case MSG_COMPLETE://资源解码成功,已将解码为Bitmap了
+          //在主线程汇总操作
           job.handleResultOnMainThread();
           break;
         case MSG_EXCEPTION:

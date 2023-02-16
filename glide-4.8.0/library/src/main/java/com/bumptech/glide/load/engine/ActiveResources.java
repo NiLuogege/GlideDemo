@@ -34,7 +34,7 @@ final class ActiveResources {
     }
   });
 
-  //一个 key 和 弱引用的资源 映射表
+  //最近使用资源远程，一个 key（EngineKey） 和 弱引用的资源 映射表
   @VisibleForTesting
   final Map<Key, ResourceWeakReference> activeEngineResources = new HashMap<>();
 
@@ -61,7 +61,9 @@ final class ActiveResources {
     this.listener = listener;
   }
 
+  //添加到 activeEngineResources 缓存中
   void activate(Key key, EngineResource<?> resource) {
+    //构建一个弱引用的 资源类
     ResourceWeakReference toPut =
         new ResourceWeakReference(
             key,
@@ -69,6 +71,7 @@ final class ActiveResources {
             getReferenceQueue(),
             isActiveResourceRetentionAllowed);
 
+    //加入到 最近使用资源的缓存中
     ResourceWeakReference removed = activeEngineResources.put(key, toPut);
     if (removed != null) {
       removed.reset();
