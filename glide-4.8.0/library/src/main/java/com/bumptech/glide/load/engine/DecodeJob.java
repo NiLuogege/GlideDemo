@@ -647,6 +647,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     //默认为 DiskCacheStrategy.AUTOMATIC 因为 isFromAlternateCacheKey = false这个 if 整体返回为 false 所以不进入这个 if
     if (diskCacheStrategy.isResourceCacheable(isFromAlternateCacheKey, dataSource,
         encodeStrategy)) {
+      Log.e(TAG,"到底进到这个里面了没? 没进来~~~");
       if (encoder == null) {
         throw new Registry.NoResultEncoderAvailableException(transformed.get().getClass());
       }
