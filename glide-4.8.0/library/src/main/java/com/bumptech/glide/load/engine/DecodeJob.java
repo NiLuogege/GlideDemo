@@ -343,7 +343,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
   private void notifyComplete(
       Resource<R> resource, //在加载网络图片流程中，为LazyBitmapDrawableResource 里面包含了 经过转换后的 BitmapResource
-      DataSource dataSource//对于加载网络图片来说是 DataSource.DATA_DISK_CACHE
+      DataSource dataSource//对于加载网络图片来说 为DataSource.REMOTE
   ) {
     setNotifiedOrThrow();
     //callback 为 EngineJob，调用到 EngineJob.onResourceReady
@@ -398,7 +398,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   public void onDataFetcherReady(Key sourceKey,  //对于获取网络图片来说这里是 GlideUrl
       Object data, //加载好的数据
       DataFetcher<?> fetcher,//对于加载网络图片来说 loadData.fetcher 为 ByteBufferFileLoader$ByteBufferFetcher
-      DataSource dataSource,//DataSource.DATA_DISK_CACHE
+      DataSource dataSource,//对于加载网络图片来说 为DataSource.REMOTE
       Key attemptedKey//和 sourceKey 一样 都是 对于获取网络图片来说这里是 GlideUrl
   ) {
     this.currentSourceKey = sourceKey;
@@ -502,7 +502,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   private <Data> Resource<R> decodeFromData(
       DataFetcher<?> fetcher,//对于加载网络图片来说 loadData.fetcher 为 ByteBufferFileLoader$ByteBufferFetcher
       Data data,//加载好的数据 对于加载网络图片来说是 ByteBuffer
-      DataSource dataSource//对于加载网络图片来说是 DataSource.DATA_DISK_CACHE
+      DataSource dataSource//对于加载网络图片来说 为DataSource.REMOTE
   ) throws GlideException {
     try {
       if (data == null) {
@@ -523,7 +523,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   @SuppressWarnings("unchecked")
   private <Data> Resource<R> decodeFromFetcher(
       Data data, //加载好的数据 对于加载网络图片来说是 ByteBuffer
-      DataSource dataSource//对于加载网络图片来说是 DataSource.DATA_DISK_CACHE
+      DataSource dataSource//对于加载网络图片来说 为DataSource.REMOTE
   )
       throws GlideException {
     //从注册表中查询到可以处理 ByteBuffer 类型数据的 LoadPath
@@ -566,7 +566,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
   private <Data, ResourceType> Resource<R> runLoadPath(
       Data data, //加载好的数据 对于加载网络图片来说是 ByteBuffer
-      DataSource dataSource,//对于加载网络图片来说是 DataSource.DATA_DISK_CACHE
+      DataSource dataSource,//对于加载网络图片来说 为DataSource.REMOTE
       LoadPath<Data, ResourceType, R> path
   ) throws GlideException {
     Options options = getOptionsWithHardwareConfig(dataSource);
@@ -603,7 +603,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   @Synthetic
   @NonNull
   <Z> Resource<Z> onResourceDecoded(
-      DataSource dataSource,//对于加载网络图片来说是 DataSource.DATA_DISK_CACHE
+      DataSource dataSource,//对于加载网络图片来说 为DataSource.REMOTE
       @NonNull Resource<Z> decoded//对于加载网络图片来说 返回一个具体类型为 BitmapResource
   ) {
     @SuppressWarnings("unchecked")
@@ -678,7 +678,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
   private final class DecodeCallback<Z> implements DecodePath.DecodeCallback<Z> {
 
-    private final DataSource dataSource;//对于加载网络图片来说是 DataSource.DATA_DISK_CACHE
+    private final DataSource dataSource;//对于加载网络图片来说 为DataSource.REMOTE
 
     @Synthetic
     DecodeCallback(DataSource dataSource) {

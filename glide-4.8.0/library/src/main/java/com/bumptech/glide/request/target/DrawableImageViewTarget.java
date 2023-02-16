@@ -24,7 +24,9 @@ public class DrawableImageViewTarget extends ImageViewTarget<Drawable> {
   }
 
   @Override
-  protected void setResource(@Nullable Drawable resource) {
+  protected void setResource(@Nullable Drawable resource//这是一个BitmapDrawable 是 Drawable 的子类
+  ) {
+    //这个的view为 ImageView ，终于他妈的给一个 ImageView设置了一个 Drawable
     view.setImageDrawable(resource);
   }
 }

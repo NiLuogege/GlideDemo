@@ -49,13 +49,13 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
   private boolean useAnimationPool;//默认为false
   private boolean onlyRetrieveFromCache;//只在内存中获取 ，默认为 false
   private Resource<?> resource; //在加载网络图片流程中，为LazyBitmapDrawableResource 里面包含了 经过转换后的 BitmapResource
-  private DataSource dataSource;//对于加载网络图片来说是 DataSource.DATA_DISK_CACHE
+  private DataSource dataSource;//对于加载网络图片来说 为DataSource.REMOTE
   private boolean hasResource;
   private GlideException exception;
   private boolean hasLoadFailed;
   // A put of callbacks that are removed while we're notifying other callbacks of a change in
   // status.
-  private List<ResourceCallback> ignoredCallbacks;
+  private List<ResourceCallback> ignoredCallbacks;//被忽略的回调
   private EngineResource<?> engineResource;
   private DecodeJob<R> decodeJob;
 
@@ -125,14 +125,20 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     executor.execute(decodeJob);
   }
 
+  /**
+   * 添加一个回调
+   * 在加载网络图片的时候 会添加一个 SingleRequest 到里面
+   */
   void addCallback(ResourceCallback cb) {
     Util.assertMainThread();
     stateVerifier.throwIfRecycled();
     if (hasResource) {
+      //如果资源已经准备好了直接 调用 onResourceReady
       cb.onResourceReady(engineResource, dataSource);
     } else if (hasLoadFailed) {
       cb.onLoadFailed(exception);
     } else {
+      //加入到集合中
       cbs.add(cb);
     }
   }
@@ -220,10 +226,14 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     listener.onEngineJobComplete(this, key, engineResource);
 
     //noinspection ForLoopReplaceableByForEach to improve perf
+    //对于 加载网络图片 cbs 中只有一个元素 那就是 SingleRequest
     for (int i = 0, size = cbs.size(); i < size; i++) {
       ResourceCallback cb = cbs.get(i);
+      //一般不会被忽略，所以会进入这个 if
       if (!isInIgnoredCallbacks(cb)) {
+        //调用者+1
         engineResource.acquire();
+        //回到到 SingleRequest的 onResourceReady
         cb.onResourceReady(engineResource, dataSource);
       }
     }
@@ -265,7 +275,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
   @Override
   public void onResourceReady(
       Resource<R> resource, //在加载网络图片流程中，为LazyBitmapDrawableResource 里面包含了 经过转换后的 BitmapResource
-      DataSource dataSource//对于加载网络图片来说是 DataSource.DATA_DISK_CACHE
+      DataSource dataSource//对于加载网络图片来说 为DataSource.REMOTE
   ) {
     this.resource = resource;
     this.dataSource = dataSource;

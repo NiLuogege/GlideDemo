@@ -25,7 +25,7 @@ class EngineResource<Z> implements Resource<Z> {
   }
 
   EngineResource(
-      Resource<Z> toWrap,//在加载网络图片流程中，为LazyBitmapDrawableResource 里面包含了 经过转换后的 BitmapResource
+      Resource<Z> toWrap,//在加载网络图片流程中，为 LazyBitmapDrawableResource 里面包含了 经过转换后的 BitmapResource
       boolean isCacheable, //内存缓存是否可用，默认为true
       boolean isRecyclable//一般为 true
   ) {
@@ -56,6 +56,7 @@ class EngineResource<Z> implements Resource<Z> {
   @NonNull
   @Override
   public Z get() {
+    //resource 在加载网络图片流程中，为 LazyBitmapDrawableResource 所以调用 LazyBitmapDrawableResource.get()
     return resource.get();
   }
 

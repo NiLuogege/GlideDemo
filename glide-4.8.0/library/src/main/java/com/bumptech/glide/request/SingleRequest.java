@@ -518,10 +518,15 @@ public final class SingleRequest<R> implements Request,
 
   /**
    * A callback method that should never be invoked directly.
+   *
+   * 正常流程下 这里会从 EngineJob中回调过来
    */
   @SuppressWarnings("unchecked")
   @Override
-  public void onResourceReady(Resource<?> resource, DataSource dataSource) {
+  public void onResourceReady(
+      Resource<?> resource,//EngineJob中回调过来的话 为 EngineResource
+      DataSource dataSource//EngineJob中回调过来的话 为 DataSource.REMOTE
+  ) {
     stateVerifier.throwIfRecycled();
     loadStatus = null;
     if (resource == null) {
@@ -531,7 +536,9 @@ public final class SingleRequest<R> implements Request,
       return;
     }
 
+    //resource 为 EngineResource 调用它的get()方法 ,最终返回的是 BitmapDrawable ，里面包含了具体的Bitmap对象
     Object received = resource.get();
+    //一般不为null
     if (received == null || !transcodeClass.isAssignableFrom(received.getClass())) {
       releaseResource(resource);
       GlideException exception = new GlideException("Expected to receive an object of "
@@ -544,6 +551,7 @@ public final class SingleRequest<R> implements Request,
       return;
     }
 
+    //一般不会浸入这个分支
     if (!canSetResource()) {
       releaseResource(resource);
       // We can't put the status to complete before asking canSetResource().
@@ -561,10 +569,16 @@ public final class SingleRequest<R> implements Request,
    * @param result   object returned by {@link Resource#get()}, checked for type and never
    *                 <code>null</code>
    */
-  private void onResourceReady(Resource<R> resource, R result, DataSource dataSource) {
+  private void onResourceReady(
+      Resource<R> resource,//EngineJob中回调过来的话 为 EngineResource
+      R result,//对于加载网络图片来说 一般为 BitmapDrawable ，里面包含了具体的Bitmap对象
+      DataSource dataSource//对于加载网络图片来说 为DataSource.REMOTE
+  ) {
     // We must call isFirstReadyResource before setting status.
     boolean isFirstResource = isFirstReadyResource();
+    //状态终于是完成了
     status = Status.COMPLETE;
+    //记录最终的 resource
     this.resource = resource;
 
     if (glideContext.getLogLevel() <= Log.DEBUG) {
@@ -576,19 +590,25 @@ public final class SingleRequest<R> implements Request,
     isCallingCallbacks = true;
     try {
       boolean anyListenerHandledUpdatingTarget = false;
+      //requestListeners 一般为 null，所以不进入这个if
       if (requestListeners != null) {
         for (RequestListener<R> listener : requestListeners) {
           anyListenerHandledUpdatingTarget |=
               listener.onResourceReady(result, model, target, dataSource, isFirstResource);
         }
       }
+
+      //一般为false
       anyListenerHandledUpdatingTarget |=
           targetListener != null
               && targetListener.onResourceReady(result, model, target, dataSource, isFirstResource);
 
+      //一般为false 所以进入这个分支
       if (!anyListenerHandledUpdatingTarget) {
+        //animationFactory 默认为 NoAnimationFactory ，返回的是 NoTransition
         Transition<? super R> animation =
             animationFactory.build(dataSource, isFirstResource);
+        //asDrawable() 流程中 target 为 DrawableImageViewTarget
         target.onResourceReady(result, animation);
       }
     } finally {

@@ -99,8 +99,13 @@ public abstract class ImageViewTarget<Z> extends ViewTarget<ImageView, Z>
   }
 
   @Override
-  public void onResourceReady(@NonNull Z resource, @Nullable Transition<? super Z> transition) {
+  public void onResourceReady(
+      @NonNull Z resource,//对于加载网络图片来说 一般为 BitmapDrawable ，里面包含了具体的Bitmap对象
+      @Nullable Transition<? super Z> transition//一般为 NoTransition
+  ) {
+    //NoTransition 的 transition 返回false ，所以会浸入这个分支
     if (transition == null || !transition.transition(resource, this)) {
+      //设置资源啦
       setResourceInternal(resource);
     } else {
       maybeUpdateAnimatable(resource);
@@ -121,10 +126,13 @@ public abstract class ImageViewTarget<Z> extends ViewTarget<ImageView, Z>
     }
   }
 
-  private void setResourceInternal(@Nullable Z resource) {
+  private void setResourceInternal(@Nullable Z resource//对于加载网络图片来说 一般为 BitmapDrawable ，里面包含了具体的Bitmap对象
+  ) {
     // Order matters here. Set the resource first to make sure that the Drawable has a valid and
     // non-null Callback before starting it.
+    //调用子类的 setResource 方法
     setResource(resource);
+    //默认没有动画，不走这个
     maybeUpdateAnimatable(resource);
   }
 

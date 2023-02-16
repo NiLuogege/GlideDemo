@@ -151,6 +151,8 @@ class SourceGenerator implements DataFetcherGenerator,
       DataSource dataSource, Key attemptedKey) {
     // This data fetcher will be loading from a File and provide the wrong data source, so override
     // with the data source of the original fetcher
+    ///对于 网络请求来说 loadData.fetcher 为 HttpUrlFetcher 所以 loadData.fetcher.getDataSource() 为 DataSource.REMOTE
+    //cb 为 DecodeJob 所以会走 DecodeJob.onDataFetcherReady
     cb.onDataFetcherReady(sourceKey, data, fetcher, loadData.fetcher.getDataSource(), sourceKey);
   }
 

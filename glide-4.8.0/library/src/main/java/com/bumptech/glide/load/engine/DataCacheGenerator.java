@@ -19,7 +19,7 @@ class DataCacheGenerator implements DataFetcherGenerator,
 
   private final List<Key> cacheKeys;
   private final DecodeHelper<?> helper;
-  //为 DecodeJob 类
+  //加载网络图片的话 为 SourceGenerator 类
   private final FetcherReadyCallback cb;
 
   private int sourceIdIndex = -1;
@@ -43,6 +43,7 @@ class DataCacheGenerator implements DataFetcherGenerator,
 
   // In some cases we may want to load a specific cache key (when loading from source written to
   // cache), so we accept a list of keys rather than just obtain the list from the helper.
+  //加载网络图片的话 会走这个 构造方法 cb 为 SourceGenerator
   DataCacheGenerator(List<Key> cacheKeys, DecodeHelper<?> helper, FetcherReadyCallback cb) {
     this.cacheKeys = cacheKeys;
     this.helper = helper;
@@ -115,7 +116,7 @@ class DataCacheGenerator implements DataFetcherGenerator,
 
   @Override
   public void onDataReady(Object data) {
-    //cb 为 DecodeJob 类,会调到 DecodeJob 的 onDataFetcherReady
+    //加载网络图片的话 为 SourceGenerator 类,会调到 SourceGenerator 的 onDataFetcherReady
     cb.onDataFetcherReady(sourceKey, data, loadData.fetcher, DataSource.DATA_DISK_CACHE, sourceKey);
   }
 

@@ -47,6 +47,7 @@ public class BitmapResource implements Resource<Bitmap>,
   @NonNull
   @Override
   public Bitmap get() {
+    //返回 bitmap 对象
     return bitmap;
   }
 

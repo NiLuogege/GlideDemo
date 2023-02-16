@@ -19,7 +19,9 @@ import com.bumptech.glide.util.Preconditions;
 public final class LazyBitmapDrawableResource implements Resource<BitmapDrawable>,
     Initializable {
 
+  //安卓系统的 Resources 对象
   private final Resources resources;
+  //加载网络图片是具体类型为 BitmapResource
   private final Resource<Bitmap> bitmapResource;
 
   /**
@@ -71,6 +73,8 @@ public final class LazyBitmapDrawableResource implements Resource<BitmapDrawable
   @NonNull
   @Override
   public BitmapDrawable get() {
+    // bitmapResource 加载网络图片是具体类型为 BitmapResource 他的 get() 会返回一个 Bitmap对象
+    //创建一个 BitmapDrawable 里面包含了 最终的 Bitmap对象
     return new BitmapDrawable(resources, bitmapResource.get());
   }
 
