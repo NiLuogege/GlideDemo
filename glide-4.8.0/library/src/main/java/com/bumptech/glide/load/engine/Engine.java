@@ -355,10 +355,16 @@ public class Engine implements EngineJobListener,
   }
 
   @Override
-  public void onResourceReleased(Key cacheKey, EngineResource<?> resource) {
+  public void onResourceReleased(
+      Key cacheKey, //这次请求的 key 是一个 EngineKey
+      EngineResource<?> resource// 这次请求的 EngineResource
+  ) {
     Util.assertMainThread();
+    //从 activeResources 中删除这个 资源
     activeResources.deactivate(cacheKey);
+    //resource 是否可以被缓存 ，默认为false
     if (resource.isCacheable()) {
+      //终于看到了缓存到 LruCache中 ，这个是变换过的资源
       cache.put(cacheKey, resource);
     } else {
       resourceRecycler.recycle(resource);

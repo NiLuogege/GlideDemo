@@ -238,6 +238,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
       }
     }
     // Our request is complete, so we can release the resource.
+    //释放资源啦
     engineResource.release();
 
     release(false /*isRemovedFromQueue*/);

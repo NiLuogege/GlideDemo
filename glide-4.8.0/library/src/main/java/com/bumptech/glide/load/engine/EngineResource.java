@@ -12,10 +12,10 @@ import com.bumptech.glide.util.Preconditions;
  * @param <Z> The type of data returned by the wrapped {@link Resource}.
  */
 class EngineResource<Z> implements Resource<Z> {
-  private final boolean isCacheable;
+  private final boolean isCacheable;//内存缓存是否可用，默认为true
   private final boolean isRecyclable;
   private ResourceListener listener;//为Engine 类
-  private Key key;
+  private Key key;//这次请求的 key 是一个 EngineKey
   private int acquired;//用来标记当前资源 被使用的个数（相同的图片可以显示到多个ImageView上），一般只有在  acquired 为 0的时候才能去回收资源
   private boolean isRecycled;
   private final Resource<Z> resource;
@@ -113,7 +113,9 @@ class EngineResource<Z> implements Resource<Z> {
     if (!Looper.getMainLooper().equals(Looper.myLooper())) {
       throw new IllegalThreadStateException("Must call release on the main thread");
     }
+    //acquired 会减1 ，一般会进入这个if
     if (--acquired == 0) {
+      //为Engine 类
       listener.onResourceReleased(key, this);
     }
   }

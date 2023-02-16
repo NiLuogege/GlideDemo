@@ -505,6 +505,7 @@ public final class SingleRequest<R> implements Request,
   }
 
   private void notifyLoadSuccess() {
+    //requestCoordinator 一般为null 可以不用管
     if (requestCoordinator != null) {
       requestCoordinator.onRequestSuccess(this);
     }
@@ -524,7 +525,7 @@ public final class SingleRequest<R> implements Request,
   @SuppressWarnings("unchecked")
   @Override
   public void onResourceReady(
-      Resource<?> resource,//EngineJob中回调过来的话 为 EngineResource
+      Resource<?> resource,//EngineJob 中回调过来的话 为 EngineResource
       DataSource dataSource//EngineJob中回调过来的话 为 DataSource.REMOTE
   ) {
     stateVerifier.throwIfRecycled();
@@ -609,12 +610,14 @@ public final class SingleRequest<R> implements Request,
         Transition<? super R> animation =
             animationFactory.build(dataSource, isFirstResource);
         //asDrawable() 流程中 target 为 DrawableImageViewTarget
+        //这里会将图片加载到ImageView上
         target.onResourceReady(result, animation);
       }
     } finally {
       isCallingCallbacks = false;
     }
 
+    //通知LoadSuccess
     notifyLoadSuccess();
   }
 

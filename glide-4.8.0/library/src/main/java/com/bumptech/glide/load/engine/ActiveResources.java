@@ -81,6 +81,7 @@ final class ActiveResources {
   void deactivate(Key key) {
     ResourceWeakReference removed = activeEngineResources.remove(key);
     if (removed != null) {
+      //清空资源
       removed.reset();
     }
   }
