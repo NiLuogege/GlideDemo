@@ -33,7 +33,9 @@ public class MyTestActivity extends Activity {
         //普通 图片
         ImageView iv = findViewById(R.id.iv);
         Glide.with(MyTestActivity.this)
+            .asBitmap()
             .load("http://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png?time="+SystemClock.currentThreadTimeMillis())
+//            .load("http://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png")
             .into(iv);
       }
     });
@@ -66,6 +68,19 @@ public class MyTestActivity extends Activity {
           }
         }).start();
         Glide.get(MyTestActivity.this).clearMemory();
+      }
+    });
+
+    View btn3 = findViewById(R.id.btn3);
+    btn3.setOnClickListener(new OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        //普通 图片
+        ImageView iv = findViewById(R.id.iv3);
+
+        Glide.with(MyTestActivity.this)
+            .load(R.mipmap.tu1)
+            .into(iv);
       }
     });
   }

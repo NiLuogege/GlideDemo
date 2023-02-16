@@ -645,6 +645,8 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     //对于获取网络图片来说  currentSourceKey 是 GlideUrl , isFromAlternateCacheKey 为 false
     boolean isFromAlternateCacheKey = !decodeHelper.isSourceKey(currentSourceKey);
     //默认为 DiskCacheStrategy.AUTOMATIC 因为 isFromAlternateCacheKey = false这个 if 整体返回为 false 所以不进入这个 if
+    // 只有本地圖片（资源文件 or sd卡文件） 而且 变换以后才会走这个流程，也就是才会硬盘缓存 变换后的图片，
+    // 也就是说网络图片默认不会 硬盘缓存变换后的图片
     if (diskCacheStrategy.isResourceCacheable(isFromAlternateCacheKey, dataSource,
         encodeStrategy)) {
       Log.e(TAG,"到底进到这个里面了没? 没进来~~~");

@@ -15,6 +15,11 @@
     android:text="加载图片不使用缓存"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"/>
+  <Button
+    android:id="@+id/btn3"
+    android:text="加载本地文件"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"/>
 
   <Button
     android:id="@+id/btn2"
@@ -33,5 +38,10 @@
     android:id="@+id/iv2"
     android:layout_width="match_parent"
     android:layout_height="100dp" />
+
+  <ImageView
+    android:id="@+id/iv3"
+    android:layout_width="50dp"
+    android:layout_height="50dp" />
 
 </LinearLayout>

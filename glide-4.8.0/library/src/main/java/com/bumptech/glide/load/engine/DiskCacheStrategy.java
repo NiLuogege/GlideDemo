@@ -131,7 +131,8 @@ public abstract class DiskCacheStrategy {
     public boolean isResourceCacheable(boolean isFromAlternateCacheKey, DataSource dataSource,
         EncodeStrategy encodeStrategy) {
       //可以简单理解为 dataSource == DataSource.LOCAL 而且 encodeStrategy == EncodeStrategy.TRANSFORMED 是会进行缓存
-      //换句话说，只有本地的resource数据为Bitmap或BitmapDrawable的资源才可以缓存。
+      //换句话说，  只有本地圖片（资源文件 or sd卡文件） 而且 变换以后才会走这个流程，也就是才会硬盘缓存 变换后的图片，
+      //也就是说网络图片默认不会 硬盘缓存变换后的图片
       return ((isFromAlternateCacheKey && dataSource == DataSource.DATA_DISK_CACHE)
           || dataSource == DataSource.LOCAL)
           && encodeStrategy == EncodeStrategy.TRANSFORMED;
