@@ -203,9 +203,11 @@ public final class Downsampler {
       options.get(ALLOW_HARDWARE_CONFIG) != null && options.get(ALLOW_HARDWARE_CONFIG);
 
     try {
+      //解码出合适尺寸的 Bitamp 并进行了 旋转和缩放
       Bitmap result = decodeFromWrappedStreams(is, bitmapFactoryOptions,
           downsampleStrategy, decodeFormat, isHardwareConfigAllowed, requestedWidth,
           requestedHeight, fixBitmapToRequestedDimensions, callbacks);
+      //封装为 BitmapResource 进行返回
       return BitmapResource.obtain(result, bitmapPool);
     } finally {
       releaseOptions(bitmapFactoryOptions);
@@ -242,6 +244,7 @@ public final class Downsampler {
 
     ImageType imageType = ImageHeaderParserUtils.getType(parsers, is, byteArrayPool);
 
+    //处理缩放
     calculateScaling(
         imageType,
         is,
@@ -254,6 +257,7 @@ public final class Downsampler {
         targetWidth,
         targetHeight,
         options);
+    //对配置进行调整
     calculateConfig(
         is,
         decodeFormat,
@@ -265,6 +269,7 @@ public final class Downsampler {
 
     boolean isKitKatOrGreater = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
     // Prior to KitKat, the inBitmap size must exactly match the size of the bitmap we're decoding.
+    //这里还是在计算宽高
     if ((options.inSampleSize == 1 || isKitKatOrGreater) && shouldUsePool(imageType)) {
       int expectedWidth;
       int expectedHeight;
@@ -296,6 +301,7 @@ public final class Downsampler {
         setInBitmap(options, bitmapPool, expectedWidth, expectedHeight);
       }
     }
+    //通过 BitmapFactory.decodeStream 和 配置 解码出一个 Bitmap
     Bitmap downsampled = decodeStream(is, options, callbacks, bitmapPool);
     callbacks.onDecodeComplete(bitmapPool, downsampled);
 
@@ -310,6 +316,7 @@ public final class Downsampler {
       // the expected density dpi.
       downsampled.setDensity(displayMetrics.densityDpi);
 
+      //对Bitmap进行旋转操作，如果不需要则 直接返回
       rotated = TransformationUtils.rotateImageExif(bitmapPool, downsampled, orientation);
       if (!downsampled.equals(rotated)) {
         bitmapPool.put(downsampled);
@@ -560,6 +567,7 @@ public final class Downsampler {
     return new int[] { options.outWidth, options.outHeight };
   }
 
+  //通过 BitmapFactory.decodeStream 解码出一个 Bitmap
   private static Bitmap decodeStream(InputStream is, BitmapFactory.Options options,
       DecodeCallbacks callbacks, BitmapPool bitmapPool) throws IOException {
     if (options.inJustDecodeBounds) {
@@ -580,6 +588,7 @@ public final class Downsampler {
     final Bitmap result;
     TransformationUtils.getBitmapDrawableLock().lock();
     try {
+      //这里进行解码生成 预期宽高，预期配置的 bitmap
       result = BitmapFactory.decodeStream(is, null, options);
     } catch (IllegalArgumentException e) {
       IOException bitmapAssertionException =

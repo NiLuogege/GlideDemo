@@ -14,6 +14,7 @@ import java.nio.ByteBuffer;
  * Decodes {@link android.graphics.Bitmap Bitmaps} from {@link java.nio.ByteBuffer ByteBuffers}.
  */
 public class ByteBufferBitmapDecoder implements ResourceDecoder<ByteBuffer, Bitmap> {
+  //是在 Glide 中初始化的
   private final Downsampler downsampler;
 
   public ByteBufferBitmapDecoder(Downsampler downsampler) {
@@ -29,7 +30,10 @@ public class ByteBufferBitmapDecoder implements ResourceDecoder<ByteBuffer, Bitm
   public Resource<Bitmap> decode(@NonNull ByteBuffer source, int width, int height,
       @NonNull Options options)
       throws IOException {
+    //ByteBuffer 转为 InputStream
     InputStream is = ByteBufferUtil.toStream(source);
+    //调用 downsampler 的 decode 方法 会返回一个 Resource<Bitmap>
+    //这个方法里 的 Bitmap是经过 缩放旋转（如果有需要） 过的，但是没有进行变换
     return downsampler.decode(is, width, height, options);
   }
 }

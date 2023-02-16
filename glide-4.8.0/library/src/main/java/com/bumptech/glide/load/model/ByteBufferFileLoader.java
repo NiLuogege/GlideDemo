@@ -62,6 +62,7 @@ public class ByteBufferFileLoader implements ModelLoader<File, ByteBuffer> {
         @NonNull DataCallback<? super ByteBuffer> callback) {
       ByteBuffer result;
       try {
+        //将file转为 ByteBuffer
         result = ByteBufferUtil.fromFile(file);
       } catch (IOException e) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
@@ -71,6 +72,7 @@ public class ByteBufferFileLoader implements ModelLoader<File, ByteBuffer> {
         return;
       }
 
+      //这里回调
       callback.onDataReady(result);
     }
 

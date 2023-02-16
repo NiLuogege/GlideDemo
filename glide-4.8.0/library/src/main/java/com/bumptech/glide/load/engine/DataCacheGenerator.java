@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.data.DataFetcher;
@@ -18,6 +19,7 @@ class DataCacheGenerator implements DataFetcherGenerator,
 
   private final List<Key> cacheKeys;
   private final DecodeHelper<?> helper;
+  //为 DecodeJob 类
   private final FetcherReadyCallback cb;
 
   private int sourceIdIndex = -1;
@@ -30,6 +32,11 @@ class DataCacheGenerator implements DataFetcherGenerator,
   @SuppressWarnings("PMD.SingularField")
   private File cacheFile;
 
+  /**
+   *
+   * @param helper
+   * @param cb 为 DecodeJob 类
+   */
   DataCacheGenerator(DecodeHelper<?> helper, FetcherReadyCallback cb) {
     this(helper.getCacheKeys(), helper, cb);
   }
@@ -63,7 +70,14 @@ class DataCacheGenerator implements DataFetcherGenerator,
       //当原始图片缓存到磁盘后会 不为null
       if (cacheFile != null) {
         this.sourceKey = sourceId;
+        //获取到可以处理file 输入数据类型的 ModelLoader
+        //可以处理 file 类型的 modelLoaders=[
+        // com.bumptech.glide.load.model.ByteBufferFileLoader@611bcaf,
+        // com.bumptech.glide.load.model.FileLoader@b64d8bc,
+        // com.bumptech.glide.load.model.FileLoader@161c045,
+        // com.bumptech.glide.load.model.UnitModelLoader@992139a]
         modelLoaders = helper.getModelLoaders(cacheFile);
+        Log.e("DataCacheGenerator","可以处理 file 类型的 modelLoaders="+modelLoaders);
         modelLoaderIndex = 0;
       }
     }
@@ -71,13 +85,17 @@ class DataCacheGenerator implements DataFetcherGenerator,
     loadData = null;
     boolean started = false;
     while (!started && hasNextModelLoader()) {
+      //这里还是调用可以处理File类型的 ModelLoader 的 buildLoadData
       ModelLoader<File, ?> modelLoader = modelLoaders.get(modelLoaderIndex++);
       loadData =
           modelLoader.buildLoadData(cacheFile, helper.getWidth(), helper.getHeight(),
               helper.getOptions());
       if (loadData != null && helper.hasLoadPath(loadData.fetcher.getDataClass())) {
         started = true;
+        //调用 loadData.fetcher.loadData 方法  回调设置的是当前类，如果处理完毕会 会调到当前类的  onDataReady or onLoadFailed
         loadData.fetcher.loadData(helper.getPriority(), this);
+        //对于加载网络图片来说 loadData.fetcher 为 ByteBufferFileLoader$ByteBufferFetcher
+        Log.e("DataCacheGenerator","loadData.fetcher="+loadData.fetcher);
       }
     }
     return started;
@@ -97,11 +115,13 @@ class DataCacheGenerator implements DataFetcherGenerator,
 
   @Override
   public void onDataReady(Object data) {
+    //cb 为 DecodeJob 类,会调到 DecodeJob 的 onDataFetcherReady
     cb.onDataFetcherReady(sourceKey, data, loadData.fetcher, DataSource.DATA_DISK_CACHE, sourceKey);
   }
 
   @Override
   public void onLoadFailed(@NonNull Exception e) {
+    //cb 为 DecodeJob 类,会调到 DecodeJob 的 onDataFetcherFailed
     cb.onDataFetcherFailed(sourceKey, e, loadData.fetcher, DataSource.DATA_DISK_CACHE);
   }
 }

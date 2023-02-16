@@ -37,7 +37,8 @@ public class LoadPath<Data, ResourceType, Transcode> {
   }
 
   public Resource<Transcode> load(DataRewinder<Data> rewinder, @NonNull Options options, int width,
-      int height, DecodePath.DecodeCallback<ResourceType> decodeCallback) throws GlideException {
+      int height, DecodePath.DecodeCallback<ResourceType> decodeCallback//为 DecodeJob 中创建的 DecodeCallback
+  ) throws GlideException {
     List<Throwable> throwables = Preconditions.checkNotNull(listPool.acquire());
     try {
       return loadWithExceptionList(rewinder, options, width, height, decodeCallback, throwables);
@@ -48,10 +49,15 @@ public class LoadPath<Data, ResourceType, Transcode> {
 
   private Resource<Transcode> loadWithExceptionList(DataRewinder<Data> rewinder,
       @NonNull Options options,
-      int width, int height, DecodePath.DecodeCallback<ResourceType> decodeCallback,
+      int width, int height, DecodePath.DecodeCallback<ResourceType> decodeCallback,//为 DecodeJob 中创建的 DecodeCallback
       List<Throwable> exceptions) throws GlideException {
     Resource<Transcode> result = null;
     //noinspection ForLoopReplaceableByForEach to improve perf
+    //这里会循环调用 decodePaths 中每一项的  decode 方法
+    //对于加载网络图片来说 decodePaths=[
+    //	DecodePath{ dataClass=class java.nio.DirectByteBuffer, decoders=[com.bumptech.glide.load.resource.gif.ByteBufferGifDecoder@54fb243], transcoder=com.bumptech.glide.load.resource.transcode.UnitTranscoder@e1180c0},
+    //	DecodePath{ dataClass=class java.nio.DirectByteBuffer, decoders=[com.bumptech.glide.load.resource.bitmap.ByteBufferBitmapDecoder@72e81f9], transcoder=com.bumptech.glide.load.resource.transcode.BitmapDrawableTranscoder@9fd653e},
+    //	DecodePath{ dataClass=class java.nio.DirectByteBuffer, decoders=[com.bumptech.glide.load.resource.bitmap.BitmapDrawableDecoder@1b12f9f], transcoder=com.bumptech.glide.load.resource.transcode.UnitTranscoder@e1180c0}]}
     for (int i = 0, size = decodePaths.size(); i < size; i++) {
       DecodePath<Data, ResourceType, Transcode> path = decodePaths.get(i);
       try {

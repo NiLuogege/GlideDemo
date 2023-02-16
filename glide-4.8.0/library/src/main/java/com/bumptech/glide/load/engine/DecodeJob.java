@@ -70,7 +70,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   private Thread currentThread;
   private Key currentSourceKey;
   private Key currentAttemptingKey;
-  private Object currentData;
+  private Object currentData;//加载好的数据
   private DataSource currentDataSource;
   private DataFetcher<?> currentFetcher;
 
@@ -227,6 +227,8 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     GlideTrace.beginSectionFormat("DecodeJob#run(model=%s)", model);
     // Methods in the try statement can invalidate currentFetcher, so set a local variable here to
     // ensure that the fetcher is cleaned up either way.
+    //对于加载网络图片来说 数据加载成功后会在当前类得 onDataFetcherReady 方法中对
+    // currentFetcher进行赋值 为 ByteBufferFileLoader$ByteBufferFetcher
     DataFetcher<?> localFetcher = currentFetcher;
     try {
       //如果已经被取消了，那就回调 onLoadFailed
@@ -278,7 +280,8 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       case SWITCH_TO_SOURCE_SERVICE:
         runGenerators();
         break;
-      case DECODE_DATA:
+      case DECODE_DATA://数据加载后会调用本类的 onDataFetcherReady 方法，然后将 runReason 赋值为 DECODE_DATA
+        //对检索到的数据进行解码
         decodeFromRetrievedData();
         break;
       default:
@@ -290,10 +293,10 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   private DataFetcherGenerator getNextGenerator() {
     switch (stage) {
       case RESOURCE_CACHE:
-        //这里从磁盘缓存中读取
+        //这里从磁盘缓存中 读取 转换过的数据
         return new ResourceCacheGenerator(decodeHelper, this);
       case DATA_CACHE:
-        //从原生数据中读取
+        //这里从磁盘缓存中 读取 原始数据 回到为当前类如果
         return new DataCacheGenerator(decodeHelper, this);
       case SOURCE:
         //这里是走网络 ,回到为 当前类 让网络图片OK以后 会回调本类的 reschedule
@@ -388,15 +391,25 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   }
 
   @Override
-  public void onDataFetcherReady(Key sourceKey, Object data, DataFetcher<?> fetcher,
-      DataSource dataSource, Key attemptedKey) {
+  public void onDataFetcherReady(Key sourceKey,  //对于获取网络图片来说这里是 GlideUrl
+      Object data, //加载好的数据
+      DataFetcher<?> fetcher,//对于加载网络图片来说 loadData.fetcher 为 ByteBufferFileLoader$ByteBufferFetcher
+      DataSource dataSource,//DataSource.DATA_DISK_CACHE
+      Key attemptedKey//和 sourceKey 一样 都是 对于获取网络图片来说这里是 GlideUrl
+  ) {
     this.currentSourceKey = sourceKey;
     this.currentData = data;
     this.currentFetcher = fetcher;
     this.currentDataSource = dataSource;
     this.currentAttemptingKey = attemptedKey;
+
+    Log.e(TAG,"线程是否相同="+(Thread.currentThread() != currentThread));
+    //一般为 false
     if (Thread.currentThread() != currentThread) {
+      //设置 runReason 为 RunReason.DECODE_DATA;
       runReason = RunReason.DECODE_DATA;
+      //callback 为 EngineJob，所以会回调到 EngineJob 的 reschedule
+      //最终会再次触发 当前类的 run 方法
       callback.reschedule(this);
     } else {
       GlideTrace.beginSection("DecodeJob.decodeFromRetrievedData");
@@ -474,8 +487,11 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     onEncodeComplete();
   }
 
-  private <Data> Resource<R> decodeFromData(DataFetcher<?> fetcher, Data data,
-      DataSource dataSource) throws GlideException {
+  private <Data> Resource<R> decodeFromData(
+      DataFetcher<?> fetcher,//对于加载网络图片来说 loadData.fetcher 为 ByteBufferFileLoader$ByteBufferFetcher
+      Data data,//加载好的数据 对于加载网络图片来说是 ByteBuffer
+      DataSource dataSource//对于加载网络图片来说是 DataSource.DATA_DISK_CACHE
+  ) throws GlideException {
     try {
       if (data == null) {
         return null;
@@ -493,9 +509,19 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   }
 
   @SuppressWarnings("unchecked")
-  private <Data> Resource<R> decodeFromFetcher(Data data, DataSource dataSource)
+  private <Data> Resource<R> decodeFromFetcher(
+      Data data, //加载好的数据 对于加载网络图片来说是 ByteBuffer
+      DataSource dataSource//对于加载网络图片来说是 DataSource.DATA_DISK_CACHE
+  )
       throws GlideException {
+    //从注册表中查询到可以处理 ByteBuffer 类型数据的 LoadPath
+    //对于加载网络图片来说 path 为 	LoadPath{
+    //	decodePaths=[
+    //	DecodePath{ dataClass=class java.nio.DirectByteBuffer, decoders=[com.bumptech.glide.load.resource.gif.ByteBufferGifDecoder@54fb243], transcoder=com.bumptech.glide.load.resource.transcode.UnitTranscoder@e1180c0},
+    //	DecodePath{ dataClass=class java.nio.DirectByteBuffer, decoders=[com.bumptech.glide.load.resource.bitmap.ByteBufferBitmapDecoder@72e81f9], transcoder=com.bumptech.glide.load.resource.transcode.BitmapDrawableTranscoder@9fd653e},
+    //	DecodePath{ dataClass=class java.nio.DirectByteBuffer, decoders=[com.bumptech.glide.load.resource.bitmap.BitmapDrawableDecoder@1b12f9f], transcoder=com.bumptech.glide.load.resource.transcode.UnitTranscoder@e1180c0}]}
     LoadPath<Data, ?, R> path = decodeHelper.getLoadPath((Class<Data>) data.getClass());
+    Log.e(TAG,"path="+path);
     return runLoadPath(data, dataSource, path);
   }
 
@@ -525,8 +551,11 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     return options;
   }
 
-  private <Data, ResourceType> Resource<R> runLoadPath(Data data, DataSource dataSource,
-      LoadPath<Data, ResourceType, R> path) throws GlideException {
+  private <Data, ResourceType> Resource<R> runLoadPath(
+      Data data, //加载好的数据 对于加载网络图片来说是 ByteBuffer
+      DataSource dataSource,//对于加载网络图片来说是 DataSource.DATA_DISK_CACHE
+      LoadPath<Data, ResourceType, R> path
+  ) throws GlideException {
     Options options = getOptionsWithHardwareConfig(dataSource);
     DataRewinder<Data> rewinder = glideContext.getRegistry().getRewinder(data);
     try {
@@ -556,8 +585,10 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
   @Synthetic
   @NonNull
-  <Z> Resource<Z> onResourceDecoded(DataSource dataSource,
-      @NonNull Resource<Z> decoded) {
+  <Z> Resource<Z> onResourceDecoded(
+      DataSource dataSource,//对于加载网络图片来说是 DataSource.DATA_DISK_CACHE
+      @NonNull Resource<Z> decoded//对于加载网络图片来说 返回一个具体类型为 BitmapResource
+  ) {
     @SuppressWarnings("unchecked")
     Class<Z> resourceSubClass = (Class<Z>) decoded.get().getClass();
     Transformation<Z> appliedTransformation = null;
@@ -618,7 +649,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
   private final class DecodeCallback<Z> implements DecodePath.DecodeCallback<Z> {
 
-    private final DataSource dataSource;
+    private final DataSource dataSource;//对于加载网络图片来说是 DataSource.DATA_DISK_CACHE
 
     @Synthetic
     DecodeCallback(DataSource dataSource) {
@@ -627,7 +658,9 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
     @NonNull
     @Override
-    public Resource<Z> onResourceDecoded(@NonNull Resource<Z> decoded) {
+    public Resource<Z> onResourceDecoded(@NonNull Resource<Z> decoded//对于加载网络图片来说 返回一个具体类型为 BitmapResource
+    ) {
+      //会调用到 本文件中的 onResourceDecoded 方法
       return DecodeJob.this.onResourceDecoded(dataSource, decoded);
     }
   }
@@ -739,6 +772,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     /**
      * We retrieved some data on a thread we don't own and want to switch back to our thread to
      * process the data.
+     * 开始解析数据
      */
     DECODE_DATA,
   }

@@ -144,6 +144,8 @@ final class DecodeHelper<Transcode> {
   }
 
   <Data> LoadPath<Data, ?, Transcode> getLoadPath(Class<Data> dataClass) {
+    //获取到 可以处理 dataClass 类型的 LoadPath
+    //对于加载网络图片来说 dataClass为 ByteBuffer ，resourceClass 为 Object ，transcodeClass 为  Class<Drawable>
     return glideContext.getRegistry().getLoadPath(dataClass, resourceClass, transcodeClass);
   }
 
