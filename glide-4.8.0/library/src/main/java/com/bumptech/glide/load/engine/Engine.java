@@ -298,6 +298,7 @@ public class Engine implements EngineJobListener,
   }
 
   private EngineResource<?> getEngineResourceFromCache(Key key) {
+    //如果有的话就会被移除调偶
     Resource<?> cached = cache.remove(key);
 
     final EngineResource<?> result;

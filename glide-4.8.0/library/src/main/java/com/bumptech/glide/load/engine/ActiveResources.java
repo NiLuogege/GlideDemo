@@ -21,14 +21,14 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 添加到该缓存会有两种情况
- *  - 命中内存缓存(LruResourceCache)  会给 ActiveResources 中添加一份
- *  - 没有命中内存缓存(LruResourceCache) ，会在图片加载变换完成后  给 ActiveResources 中添加一份
- *
+ * - 命中内存缓存(LruResourceCache)  会给 ActiveResources 中添加一份 ，但是 内存缓存(LruResourceCache)中的会被删除掉 代码位置是在 Engine.getEngineResourceFromCache
+ * - 没有命中内存缓存(LruResourceCache) ，会在图片加载变换完成后  给 ActiveResources 中添加一份 代码位置是在 Engine.onEngineJobComplete
+ * <p>
  * 移除缓存的话只有一种情况
- *  -在 对应的 EngineResource 没有一个被引用者的时候（其实就是对应的资源被替换or销毁的时候）会被移除
- *
- *
- *  其实也就是说这个缓存中存储的是当前正在显示（使用）的资源
+ * -在 对应的 EngineResource 没有一个被引用者的时候（其实就是对应的资源被替换or销毁的时候）会被移除
+ * <p>
+ * <p>
+ * 其实也就是说这个缓存中存储的是当前正在显示（使用）的资源
  */
 final class ActiveResources {
   private static final int MSG_CLEAN_REF = 1;
@@ -46,8 +46,7 @@ final class ActiveResources {
   });
 
   //最近使用资源远程，一个 key（EngineKey） 和 弱引用的资源 映射表
-  @VisibleForTesting
-  final Map<Key, ResourceWeakReference> activeEngineResources = new HashMap<>();
+  @VisibleForTesting final Map<Key, ResourceWeakReference> activeEngineResources = new HashMap<>();
 
   private ResourceListener listener;
 
@@ -112,7 +111,8 @@ final class ActiveResources {
   }
 
   @SuppressWarnings("WeakerAccess")
-  @Synthetic void cleanupActiveReference(@NonNull ResourceWeakReference ref) {
+  @Synthetic
+  void cleanupActiveReference(@NonNull ResourceWeakReference ref) {
     Util.assertMainThread();
     activeEngineResources.remove(ref.key);
 
@@ -142,7 +142,8 @@ final class ActiveResources {
   }
 
   @SuppressWarnings("WeakerAccess")
-  @Synthetic void cleanReferenceQueue() {
+  @Synthetic
+  void cleanReferenceQueue() {
     while (!isShutdown) {
       try {
         ResourceWeakReference ref = (ResourceWeakReference) resourceReferenceQueue.remove();
@@ -188,15 +189,23 @@ final class ActiveResources {
     }
   }
 
-  /**'
+  /**
+   * '
    * 弱引用封装 内存不足的时候 会被回收
    */
   @VisibleForTesting
   static final class ResourceWeakReference extends WeakReference<EngineResource<?>> {
-    @SuppressWarnings("WeakerAccess") @Synthetic final Key key;
-    @SuppressWarnings("WeakerAccess") @Synthetic final boolean isCacheable;
+    @SuppressWarnings("WeakerAccess")
+    @Synthetic
+    final Key key;
+    @SuppressWarnings("WeakerAccess")
+    @Synthetic
+    final boolean isCacheable;
 
-    @Nullable @SuppressWarnings("WeakerAccess") @Synthetic Resource<?> resource;
+    @Nullable
+    @SuppressWarnings("WeakerAccess")
+    @Synthetic
+    Resource<?> resource;
 
     @Synthetic
     @SuppressWarnings("WeakerAccess")
