@@ -35,7 +35,6 @@ public class MyTestActivity extends Activity {
         //普通 图片
         ImageView iv = findViewById(R.id.iv);
         Glide.with(MyTestActivity.this)
-            .asBitmap()
             .load("http://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png?time="+SystemClock.currentThreadTimeMillis())
 //            .load("http://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png")
             .into(iv);
