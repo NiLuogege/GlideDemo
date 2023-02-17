@@ -22,7 +22,8 @@ import java.io.IOException;
  *  - 当资源变换以后 会进行缓存 ，具体代码位置在 DecodeJob.DeferredEncodeManager.encode ,
  *      其实缓存变换后的图片的只会发生在加载本地文件（资源文件 or sd卡文件）的时候 因为在 DiskCacheStrategy.AUTOMATIC.isResourceCacheable 中明确指定了
  *      dataSource == DataSource.LOCAL 而且   encodeStrategy == EncodeStrategy.TRANSFORMED 也就是说 需要是本地文件（资源文件 or sd卡文件）而且是经过变换的
- *
+ *也就是网路图片只会缓存源文件， 本底图片只会缓存转换后的文件 ，为什么网络图片不缓存转换后的文件呢？ 应该是考虑到磁盘容量的问题吧，因为LruCache的容量是固定的，如果存储了
+ * 大量转换后的图片那就增加了未能命中网络图片的概率，降低了加载速度
  * 移除缓存的话只有一种情况
  *  - 缓存容量不够的时候
  */
