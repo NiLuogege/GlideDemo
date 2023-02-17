@@ -15,6 +15,8 @@ import com.bumptech.glide.util.LruCache;
  *
  * 移除缓存的话只有一种情况
  *  - 当LruCache 容量不够的时候
+ *
+ * 这个缓存可以说是 第二级内存缓存，缓存的是之前用过但是现在没用的资源
  */
 public class LruResourceCache extends LruCache<Key, Resource<?>> implements MemoryCache {
   private ResourceRemovedListener listener;

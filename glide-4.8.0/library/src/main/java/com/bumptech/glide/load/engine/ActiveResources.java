@@ -25,10 +25,10 @@ import java.util.concurrent.TimeUnit;
  * - 没有命中内存缓存(LruResourceCache) ，会在图片加载变换完成后  给 ActiveResources 中添加一份 代码位置是在 Engine.onEngineJobComplete
  * <p>
  * 移除缓存的话只有一种情况
- * -在 对应的 EngineResource 没有一个被引用者的时候（其实就是对应的资源被替换or销毁的时候）会被移除
+ * -在 对应的 EngineResource 没有一个被引用者的时候（其实就是对应的资源被替换or销毁的时候）会被移除 代码位置是在 EngineResource.release
  * <p>
  * <p>
- * 其实也就是说这个缓存中存储的是当前正在显示（使用）的资源
+ * 这个缓存可以说是 第一级内存缓存，这个缓存中存储的是当前正在显示（使用）的资源
  */
 final class ActiveResources {
   private static final int MSG_CLEAN_REF = 1;
