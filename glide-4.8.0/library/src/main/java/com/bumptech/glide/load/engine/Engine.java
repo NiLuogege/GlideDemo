@@ -286,9 +286,11 @@ public class Engine implements EngineJobListener,
       return null;
     }
 
+    //从内存缓存（LruResourceCache） 中获取
     EngineResource<?> cached = getEngineResourceFromCache(key);
     if (cached != null) {
       cached.acquire();
+      //如果有的话会 添加到 最近活跃资源缓存 中
       activeResources.activate(key, cached);
     }
     return cached;
