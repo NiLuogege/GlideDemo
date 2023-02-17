@@ -22,11 +22,14 @@ public class ResourceDecoderRegistry {
   public synchronized void setBucketPriorityList(@NonNull List<String> buckets) {
     List<String> previousBuckets = new ArrayList<>(bucketPriorityList);
     bucketPriorityList.clear();
+    //记录到 bucketPriorityList 中
     bucketPriorityList.addAll(buckets);
+    //previousBuckets 一般应该是空的
     for (String previousBucket : previousBuckets) {
       if (!buckets.contains(previousBucket)) {
         // Keep any buckets from the previous list that aren't included here, but but them at the
         // end.
+        //如果 bucketPriorityList 中没有这项 ，那也添加进去
         bucketPriorityList.add(previousBucket);
       }
     }

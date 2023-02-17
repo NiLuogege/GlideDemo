@@ -383,6 +383,7 @@ public class Glide implements ComponentCallbacks2 {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
       registry.register(new ExifInterfaceImageHeaderParser());
     }
+    //添加默认的 图片头解析器
     registry.register(new DefaultImageHeaderParser());
 
     Downsampler downsampler = new Downsampler(registry.getImageHeaderParsers(),

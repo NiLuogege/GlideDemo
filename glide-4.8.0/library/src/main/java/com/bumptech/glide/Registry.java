@@ -35,6 +35,10 @@ import java.util.List;
  * encoding logic.
  *
  * 注册表，这里注册了 所有用于加载，编码，解码的 工具，一般可以通过一个key 或者 多个key获取指定的 类
+ *
+ * 这是一个主注册表，会将配置分发到其他自注册表中
+ *
+ * 值得注意的是 Registry 中注册的所有组件我们都可以在自定义配置中进行 替换或者添加新的
  */
 // Public API.
 @SuppressWarnings({"WeakerAccess", "unused"})
@@ -70,7 +74,7 @@ public class Registry {
    */
   private final TranscoderRegistry transcoderRegistry;
   /**
-   * 图片头解析
+   * 图片头解析 注册表
    */
   private final ImageHeaderParserRegistry imageHeaderParserRegistry;
 
@@ -80,14 +84,21 @@ public class Registry {
   private final Pool<List<Throwable>> throwableListPool = FactoryPools.threadSafeList();
 
   public Registry() {
-    //创建 ModelLoaderRegistry
+    //数据加载模块 注册表，不同的数据类型使用不同的 ModelLoader（处理类）
     this.modelLoaderRegistry = new ModelLoaderRegistry(throwableListPool);
+    //编码模块 用于将不同的数据源 缓存到磁盘上
     this.encoderRegistry = new EncoderRegistry();
+    //解码模块 ，用于将不同的数据源 解码为 Bitmap ，Drawable 等
     this.decoderRegistry = new ResourceDecoderRegistry();
+    //资源编码 ，用于将 Bitmap，Drawable 等 Resource 缓存到磁盘上
     this.resourceEncoderRegistry = new ResourceEncoderRegistry();
+    //数据重定向模块
     this.dataRewinderRegistry = new DataRewinderRegistry();
+    //类型转换模块，提供将不同资源类型进行转换的能力，例如将bitmap转成drawable等
     this.transcoderRegistry = new TranscoderRegistry();
+    //图片头解析 注册表
     this.imageHeaderParserRegistry = new ImageHeaderParserRegistry();
+    //设置资源编码器的优先级顺序
     setResourceDecoderBucketPriorityList(
         Arrays.asList(BUCKET_GIF, BUCKET_BITMAP, BUCKET_BITMAP_DRAWABLE));
   }
@@ -285,6 +296,9 @@ public class Registry {
    * @see #prepend(String, Class, Class, ResourceDecoder)
    *
    * @param buckets The list of bucket identifiers in order from highest priority to least priority.
+   *
+   *
+   *                这里是确定了 具体编码类的执行顺序吗？？？
    */
   // Final to avoid a PMD error.
   @NonNull
@@ -292,6 +306,7 @@ public class Registry {
     List<String> modifiedBuckets = new ArrayList<>(buckets);
     modifiedBuckets.add(0, BUCKET_PREPEND_ALL);
     modifiedBuckets.add(BUCKET_APPEND_ALL);
+    //添加到编码注册中心 中
     decoderRegistry.setBucketPriorityList(modifiedBuckets);
     return this;
   }

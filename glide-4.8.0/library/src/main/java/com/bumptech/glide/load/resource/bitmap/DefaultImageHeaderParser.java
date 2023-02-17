@@ -19,6 +19,8 @@ import java.nio.charset.Charset;
 
 /**
  * A class for parsing the exif orientation and other data from an image header.
+ *
+ *用于解析图片头来判断 是否是 GIF or PNG  or JPEG or WEBP or 其他 这个我们可以用在其他地方
  */
 public final class DefaultImageHeaderParser implements ImageHeaderParser {
   // Due to https://code.google.com/p/android/issues/detail?id=97751.
@@ -57,12 +59,18 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
   private static final int WEBP_EXTENDED_ALPHA_FLAG = 1 << 4;
   private static final int WEBP_LOSSLESS_ALPHA_FLAG = 1 << 3;
 
+  /**
+   * 数据源是 流
+   */
   @NonNull
   @Override
   public ImageType getType(@NonNull InputStream is) throws IOException {
     return getType(new StreamReader(Preconditions.checkNotNull(is)));
   }
 
+  /**
+   * 数据源是 ByteBuffer
+   */
   @NonNull
   @Override
   public ImageType getType(@NonNull ByteBuffer byteBuffer) throws IOException {
@@ -83,6 +91,7 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
         Preconditions.checkNotNull(byteArrayPool));
   }
 
+  //确定图片 是否什么类型 GIF or PNG  or JPEG or WEBP or 其他 ，可以通过图片头的 前16 位来判断
   @NonNull
   private ImageType getType(Reader reader) throws IOException {
     final int firstTwoBytes = reader.getUInt16();
