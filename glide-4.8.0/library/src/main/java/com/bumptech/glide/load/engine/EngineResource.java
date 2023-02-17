@@ -2,6 +2,7 @@ package com.bumptech.glide.load.engine;
 
 import android.os.Looper;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.util.Preconditions;
 
@@ -113,8 +114,10 @@ class EngineResource<Z> implements Resource<Z> {
     if (!Looper.getMainLooper().equals(Looper.myLooper())) {
       throw new IllegalThreadStateException("Must call release on the main thread");
     }
-    //acquired 会减1 ，一般会进入这个if
+    //acquired 会减1 ，一次完整的网络加载图片 不会进入这个分支，所以
+    Log.e("EngineResource", "release 外面 acquired=" + acquired);
     if (--acquired == 0) {
+      Log.e("EngineResource", "release 里面 acquired=" + acquired);
       //为Engine 类
       listener.onResourceReleased(key, this);
     }

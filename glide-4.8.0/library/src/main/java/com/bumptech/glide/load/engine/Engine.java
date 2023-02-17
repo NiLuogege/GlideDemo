@@ -203,6 +203,7 @@ public class Engine implements EngineJobListener,
     //从内存缓存中获取 这个是 LruResourceCache
     EngineResource<?> cached = loadFromCache(key, isMemoryCacheable);
     if (cached != null) {//找到了 直接调用 onResourceReady
+      //cb 对象为 SingleRequest
       cb.onResourceReady(cached, DataSource.MEMORY_CACHE);
       if (VERBOSE_IS_LOGGABLE) {
         logWithTimeAndKey("Loaded resource from cache", startTime, key);
@@ -336,6 +337,7 @@ public class Engine implements EngineJobListener,
       //一般是true
       if (resource.isCacheable()) {
         //加入到 activeEngineResources 这个最近使用资源的 缓存中 是一个 HashMap 弱引用了 resource
+        Log.e(TAG,"向 activeResources 中添加缓存 cacheKey="+key);
         activeResources.activate(key, resource);
       }
     }
@@ -363,6 +365,7 @@ public class Engine implements EngineJobListener,
   ) {
     Util.assertMainThread();
     //从 activeResources 中删除这个 资源
+    Log.e(TAG,"从 activeResources 中删除缓存  cacheKey="+cacheKey);
     activeResources.deactivate(cacheKey);
     //resource 是否可以被缓存 ，默认为false
     if (resource.isCacheable()) {

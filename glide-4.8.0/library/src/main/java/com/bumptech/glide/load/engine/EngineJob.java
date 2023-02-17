@@ -219,7 +219,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
 
     // Hold on to resource for duration of request so we don't recycle it in the middle of
     // notifying if it synchronously released by one of the callbacks.
-    //增加engineResource 的使用数量
+    //调用者+1
     engineResource.acquire();
 
     //listener 为 Engine 类 ,调用到 Engine.onEngineJobComplete

@@ -25,11 +25,10 @@ import java.util.concurrent.TimeUnit;
  *  - 没有命中内存缓存(LruResourceCache) ，会在图片加载变换完成后  给 ActiveResources 中添加一份
  *
  * 移除缓存的话只有一种情况
- *  - 当资源加载成功后，会进行释放
+ *  -在 对应的 EngineResource 没有一个被引用者的时候（其实就是对应的资源被替换or销毁的时候）会被移除
  *
  *
- * 这里的缓存生命周期很短，资源加载好就加进入，下来打扫战场的时候（释放相关资源的时候）就又给删除了，
- * 感觉这个缓存存在的意义是为了防止同时大量重复的图片加载， 给 内存缓存(LruResourceCache) 做了移到屏障
+ *  其实也就是说这个缓存中存储的是当前正在显示（使用）的资源
  */
 final class ActiveResources {
   private static final int MSG_CLEAN_REF = 1;
