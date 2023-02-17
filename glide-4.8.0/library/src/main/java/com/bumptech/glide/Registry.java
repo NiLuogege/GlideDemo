@@ -582,26 +582,37 @@ public class Registry {
     return decodePaths;
   }
 
+  /**
+   * 获取到 可以将 modelClass 转为 resourceClass 的 ModelLoader
+   */
   @NonNull
   public <Model, TResource, Transcode> List<Class<?>> getRegisteredResourceClasses(
       @NonNull Class<Model> modelClass, @NonNull Class<TResource> resourceClass,
       @NonNull Class<Transcode> transcodeClass) {
+    //先从缓存中拿 ，第一次肯定没有
     List<Class<?>> result = modelToResourceClassCache.get(modelClass, resourceClass);
 
     if (result == null) {
       result = new ArrayList<>();
+      //获取可以处理 modelClass 的所有 dataClasses
       List<Class<?>> dataClasses = modelLoaderRegistry.getDataClasses(modelClass);
+      //遍历
       for (Class<?> dataClass : dataClasses) {
+        //获取到可以将 dataClass 解码为 resourceClass 的 所有 decoder
         List<? extends Class<?>> registeredResourceClasses =
             decoderRegistry.getResourceClasses(dataClass, resourceClass);
+        //遍历所有 decoder
         for (Class<?> registeredResourceClass : registeredResourceClasses) {
+          //获取到所有可以将 registeredResourceClass 转为  transcodeClass 的 转换器
           List<Class<Transcode>> registeredTranscodeClasses = transcoderRegistry
               .getTranscodeClasses(registeredResourceClass, transcodeClass);
           if (!registeredTranscodeClasses.isEmpty() && !result.contains(registeredResourceClass)) {
+            //添加到 结果集合中
             result.add(registeredResourceClass);
           }
         }
       }
+      //添加到缓存中
       modelToResourceClassCache.put(modelClass, resourceClass,
           Collections.unmodifiableList(result));
     }
