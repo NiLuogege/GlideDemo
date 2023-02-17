@@ -84,7 +84,7 @@ class SourceGenerator implements DataFetcherGenerator,
           new DataCacheWriter<>(encoder, dataToCache, helper.getOptions());
       //创建原始key
       originalKey = new DataCacheKey(loadData.sourceKey, helper.getSignature());
-      //缓存到磁盘
+      //将原始文件缓存到磁盘,最终会调用 DiskLruCacheWrapper.put 方法
       helper.getDiskCache().put(originalKey, writer);
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         Log.v(TAG, "Finished encoding source to cache"

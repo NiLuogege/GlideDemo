@@ -16,6 +16,15 @@ import java.io.IOException;
  * directory at a time.
  *
  * @see #get(java.io.File, long)
+ *
+ * 添加到该缓存会有两种情况
+ *  - 当原始资源加载完毕后（比如网络图片下载解码完毕后）会进行缓存，具体代码位置在 SourceGenerator.cacheData .其实原始图片只会在加载网络图片的时候生效
+ *  - 当资源变换以后 会进行缓存 ，具体代码位置在 DecodeJob.DeferredEncodeManager.encode ,
+ *      其实缓存变换后的图片的只会发生在加载本地文件（资源文件 or sd卡文件）的时候 因为在 DiskCacheStrategy.AUTOMATIC.isResourceCacheable 中明确指定了
+ *      dataSource == DataSource.LOCAL 而且   encodeStrategy == EncodeStrategy.TRANSFORMED 也就是说 需要是本地文件（资源文件 or sd卡文件）而且是经过变换的
+ *
+ * 移除缓存的话只有一种情况
+ *  - 缓存容量不够的时候
  */
 public class DiskLruCacheWrapper implements DiskCache {
   private static final String TAG = "DiskLruCacheWrapper";
