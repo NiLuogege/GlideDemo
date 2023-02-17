@@ -11,7 +11,7 @@ import com.bumptech.glide.util.LruCache;
  * An LRU in memory cache for {@link com.bumptech.glide.load.engine.Resource}s.
  *
  * 添加到该缓存只有一种情况
- *  - 当ActiveResources 中对应的资源被回收的时候（也就是说对应的资源不可见了） 会添加到这个缓存中
+ *  - 当ActiveResources 中对应的资源被回收的时候（也就是说对应的资源不可见了） 会添加到这个缓存中  代码位置在 Engine.onResourceReleased
  *
  * 移除缓存的话只有一种情况
  *  - 当LruCache 容量不够的时候
