@@ -3,6 +3,7 @@ package com.bumptech.glide;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pools.Pool;
+import android.util.Log;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.Options;
@@ -33,11 +34,11 @@ import java.util.List;
 /**
  * Manages component registration to extend or replace Glide's default loading, decoding, and
  * encoding logic.
- *
+ * <p>
  * 注册表，这里注册了 所有用于加载，编码，解码的 工具，一般可以通过一个key 或者 多个key获取指定的 类
- *
+ * <p>
  * 这是一个主注册表，会将配置分发到其他自注册表中
- *
+ * <p>
  * 值得注意的是 Registry 中注册的所有组件我们都可以在自定义配置中进行 替换或者添加新的
  */
 // Public API.
@@ -173,14 +174,13 @@ public class Registry {
    * best for new types of resources and data or as a way to add an additional fallback decoder
    * for an existing type of data.
    *
+   * @param dataClass     The data that will be decoded from
+   *                      ({@link java.io.InputStream}, {@link java.io.FileDescriptor} etc).
+   * @param resourceClass The resource that will be decoded to ({@link android.graphics.Bitmap},
+   *                      {@link com.bumptech.glide.load.resource.gif.GifDrawable} etc).
+   * @param decoder       The {@link ResourceDecoder} to register.
    * @see #append(String, Class, Class, ResourceDecoder)
    * @see #prepend(Class, Class, ResourceDecoder)
-   *
-   * @param dataClass The data that will be decoded from
-   * ({@link java.io.InputStream}, {@link java.io.FileDescriptor} etc).
-   * @param resourceClass The resource that will be decoded to ({@link android.graphics.Bitmap},
-   * {@link com.bumptech.glide.load.resource.gif.GifDrawable} etc).
-   * @param decoder The {@link ResourceDecoder} to register.
    */
   @NonNull
   public <Data, TResource> Registry append(
@@ -202,15 +202,16 @@ public class Registry {
    * best for new types of resources and data or as a way to add an additional fallback decoder
    * for an existing type of data.
    *
+   * @param bucket        The bucket identifier to add this decoder to.
+   * @param dataClass     The data that will be decoded from
+   *                      ({@link java.io.InputStream}, {@link java.io.FileDescriptor} etc).
+   * @param resourceClass The resource that will be decoded to ({@link android.graphics.Bitmap},
+   *                      {@link com.bumptech.glide.load.resource.gif.GifDrawable} etc).
+   * @param decoder       The {@link ResourceDecoder} to register.
    * @see #prepend(String, Class, Class, ResourceDecoder)
    * @see #setResourceDecoderBucketPriorityList(List)
    *
-   * @param bucket The bucket identifier to add this decoder to.
-   * @param dataClass The data that will be decoded from
-   * ({@link java.io.InputStream}, {@link java.io.FileDescriptor} etc).
-   * @param resourceClass The resource that will be decoded to ({@link android.graphics.Bitmap},
-   * {@link com.bumptech.glide.load.resource.gif.GifDrawable} etc).
-   * @param decoder The {@link ResourceDecoder} to register.
+   *   //添加一个 可以将 dataClass 转为 resourceClass 的解码器
    */
   @NonNull
   public <Data, TResource> Registry append(
@@ -233,14 +234,13 @@ public class Registry {
    * {@link ResourceDecoder}s if you only want to change the default functionality for certain
    * types of data.
    *
+   * @param dataClass     The data that will be decoded from
+   *                      ({@link java.io.InputStream}, {@link java.io.FileDescriptor} etc).
+   * @param resourceClass The resource that will be decoded to ({@link android.graphics.Bitmap},
+   *                      {@link com.bumptech.glide.load.resource.gif.GifDrawable} etc).
+   * @param decoder       The {@link ResourceDecoder} to register.
    * @see #prepend(String, Class, Class, ResourceDecoder)
    * @see #append(Class, Class, ResourceDecoder)
-   *
-   * @param dataClass The data that will be decoded from
-   * ({@link java.io.InputStream}, {@link java.io.FileDescriptor} etc).
-   * @param resourceClass The resource that will be decoded to ({@link android.graphics.Bitmap},
-   * {@link com.bumptech.glide.load.resource.gif.GifDrawable} etc).
-   * @param decoder The {@link ResourceDecoder} to register.
    */
   @NonNull
   public <Data, TResource> Registry prepend(
@@ -262,15 +262,14 @@ public class Registry {
    * {@link ResourceDecoder}s if you only want to change the default functionality for certain
    * types of data.
    *
+   * @param bucket        The bucket identifier to add this decoder to.
+   * @param dataClass     The data that will be decoded from
+   *                      ({@link java.io.InputStream}, {@link java.io.FileDescriptor} etc).
+   * @param resourceClass The resource that will be decoded to ({@link android.graphics.Bitmap},
+   *                      {@link com.bumptech.glide.load.resource.gif.GifDrawable} etc).
+   * @param decoder       The {@link ResourceDecoder} to register.
    * @see #append(String, Class, Class, ResourceDecoder)
    * @see #setResourceDecoderBucketPriorityList(List)
-   *
-   * @param bucket The bucket identifier to add this decoder to.
-   * @param dataClass The data that will be decoded from
-   * ({@link java.io.InputStream}, {@link java.io.FileDescriptor} etc).
-   * @param resourceClass The resource that will be decoded to ({@link android.graphics.Bitmap},
-   * {@link com.bumptech.glide.load.resource.gif.GifDrawable} etc).
-   * @param decoder The {@link ResourceDecoder} to register.
    */
   @NonNull
   public <Data, TResource> Registry prepend(
@@ -292,13 +291,13 @@ public class Registry {
    *
    * <p>When registering decoders, you can use these buckets to specify the ordering relative only
    * to other decoders in that bucket.
-   * @see #append(String, Class, Class, ResourceDecoder)
-   * @see #prepend(String, Class, Class, ResourceDecoder)
    *
    * @param buckets The list of bucket identifiers in order from highest priority to least priority.
-   *
-   *
+   *                <p>
+   *                <p>
    *                这里是确定了 具体编码类的执行顺序吗？？？
+   * @see #append(String, Class, Class, ResourceDecoder)
+   * @see #prepend(String, Class, Class, ResourceDecoder)
    */
   // Final to avoid a PMD error.
   @NonNull
@@ -390,11 +389,11 @@ public class Registry {
    * Registers the given {@link ResourceTranscoder} to convert from the given resource {@link Class}
    * to the given transcode {@link Class}.
    *
-   * @param resourceClass The class that will be transcoded from (e.g.
-   * {@link android.graphics.Bitmap}).
+   * @param resourceClass  The class that will be transcoded from (e.g.
+   *                       {@link android.graphics.Bitmap}).
    * @param transcodeClass The class that will be transcoded to (e.g.
-   * {@link android.graphics.drawable.BitmapDrawable}).
-   * @param transcoder The {@link ResourceTranscoder} to register.
+   *                       {@link android.graphics.drawable.BitmapDrawable}).
+   * @param transcoder     The {@link ResourceTranscoder} to register.
    */
   @NonNull
   public <TResource, Transcode> Registry register(
@@ -429,12 +428,11 @@ public class Registry {
    * {@link ModelLoaderFactory}s were registered. Only if all {@link ModelLoader}s fail will the
    * entire request fail.
    *
-   * @see #prepend(Class, Class, ModelLoaderFactory)
-   * @see #replace(Class, Class, ModelLoaderFactory)
-   *
    * @param modelClass The model class (e.g. URL, file path).
    * @param dataClass  the data class (e.g. {@link java.io.InputStream},
-   * {@link java.io.FileDescriptor}).
+   *                   {@link java.io.FileDescriptor}).
+   * @see #prepend(Class, Class, ModelLoaderFactory)
+   * @see #replace(Class, Class, ModelLoaderFactory)
    */
   @NonNull
   public <Model, Data> Registry append(
@@ -460,12 +458,11 @@ public class Registry {
    * {@link ModelLoaderFactory}s were registered. Only if all {@link ModelLoader}s fail will the
    * entire request fail.
    *
-   * @see #append(Class, Class, ModelLoaderFactory)
-   * @see #replace(Class, Class, ModelLoaderFactory)
-   *
    * @param modelClass The model class (e.g. URL, file path).
    * @param dataClass  the data class (e.g. {@link java.io.InputStream},
-   * {@link java.io.FileDescriptor}).
+   *                   {@link java.io.FileDescriptor}).
+   * @see #append(Class, Class, ModelLoaderFactory)
+   * @see #replace(Class, Class, ModelLoaderFactory)
    */
   @NonNull
   public <Model, Data> Registry prepend(
@@ -491,12 +488,11 @@ public class Registry {
    * library to run in some cases. Using this method will ensure that only your networking library
    * will run and that the request will fail otherwise.
    *
-   * @see #prepend(Class, Class, ModelLoaderFactory)
-   * @see #append(Class, Class, ModelLoaderFactory)
-   *
    * @param modelClass The model class (e.g. URL, file path).
    * @param dataClass  the data class (e.g. {@link java.io.InputStream},
-   * {@link java.io.FileDescriptor}).
+   *                   {@link java.io.FileDescriptor}).
+   * @see #prepend(Class, Class, ModelLoaderFactory)
+   * @see #append(Class, Class, ModelLoaderFactory)
    */
   @NonNull
   public <Model, Data> Registry replace(
@@ -508,21 +504,27 @@ public class Registry {
   }
 
   /**
-   *
-   getLoadPath()入参类型为<Data, TResource, Transcode>，
-   其中<Data>是在getModelLoaders()返回的类型，例如InputStream或者ByteBuffer，
-   <TResource>是待定类型，调用者一般传?,<Transcode>为调用Glide.with().as(xxx)时as()传入的类型，
-   Glide提供有asBitmap(),asFile(),asGif()，默认是Drawable类型；在调用时<TResource>是待定类型
+   * getLoadPath()入参类型为<Data, TResource, Transcode>，
+   * 其中<Data>是在getModelLoaders()返回的类型，例如InputStream或者ByteBuffer，
+   * <TResource>是待定类型，调用者一般传?,<Transcode>为调用Glide.with().as(xxx)时as()传入的类型，
+   * Glide提供有asBitmap(),asFile(),asGif()，默认是Drawable类型；在调用时<TResource>是待定类型
+   * <p>
+   * 我们以 加载网络图片来说 dataClass为 ByteBuffer ，resourceClass 为 Object ，transcodeClass 为  Class<Drawable>
    */
   @Nullable
   public <Data, TResource, Transcode> LoadPath<Data, TResource, Transcode> getLoadPath(
-      @NonNull Class<Data> dataClass, @NonNull Class<TResource> resourceClass,
-      @NonNull Class<Transcode> transcodeClass) {
+      @NonNull Class<Data> dataClass, //加载网络图片来说 dataClass为 ByteBuffer
+      @NonNull Class<TResource> resourceClass,
+      //加载网络图片来说 resourceClass 为  Class<Drawable> 前面都搞错了，后面再纠正
+      @NonNull Class<Transcode> transcodeClass //加载网络图片来说 transcodeClass 为 Class<Drawable>
+  ) {
+    //在缓存中查找 第一次肯定没有的 ，不是主流程
     LoadPath<Data, TResource, Transcode> result =
         loadPathCache.get(dataClass, resourceClass, transcodeClass);
     if (loadPathCache.isEmptyLoadPath(result)) {
       return null;
     } else if (result == null) {
+      //获取解码路径
       List<DecodePath<Data, TResource, Transcode>> decodePaths =
           getDecodePaths(dataClass, resourceClass, transcodeClass);
       // It's possible there is no way to decode or transcode to the desired types from a given
@@ -539,36 +541,43 @@ public class Registry {
     return result;
   }
 
+  /**
+   * 获取到解码路径
+   */
   @NonNull
   private <Data, TResource, Transcode> List<DecodePath<Data, TResource, Transcode>> getDecodePaths(
-      @NonNull Class<Data> dataClass, @NonNull Class<TResource> resourceClass,
-      @NonNull Class<Transcode> transcodeClass) {
+      @NonNull Class<Data> dataClass,  //加载网络图片来说 dataClass为 ByteBuffer
+      @NonNull Class<TResource> resourceClass,
+      //加载网络图片来说 resourceClass 为  Class<Drawable> 前面都搞错了，后面再纠正
+      @NonNull Class<Transcode> transcodeClass//加载网络图片来说 transcodeClass 为 Class<Drawable>
+  ) {
     List<DecodePath<Data, TResource, Transcode>> decodePaths = new ArrayList<>();
-    //获取所有dataClass对应的ResourceClasses
-    List<Class<TResource>> registeredResourceClasses =
-        decoderRegistry.getResourceClasses(dataClass, resourceClass);
-    //遍历registeredResourceClass
+    //获取所有可以将 dataClass  转为 resourceClass 的对应的 decoder 的 resourceClass 集合 ，有可能有多个
+    List<Class<TResource>> registeredResourceClasses = decoderRegistry
+        .getResourceClasses(dataClass, resourceClass);
+    //遍历 registeredResourceClass
     for (Class<TResource> registeredResourceClass : registeredResourceClasses) {
-      //获取所有的registeredResourceClass对应的registeredTranscodeClasses
+      //获取所有 可以将 registeredResourceClass 转为 transcodeClass 的对应的 transcoder 的 transcodeClass 集合
       List<Class<Transcode>> registeredTranscodeClasses =
           transcoderRegistry.getTranscodeClasses(registeredResourceClass, transcodeClass);
       //遍历registeredTranscodeClasses
       for (Class<Transcode> registeredTranscodeClass : registeredTranscodeClasses) {
-        //获取dataClass和registeredResourceClass对应的所有ResourceDecoder
+        //获取所有可以将 dataClass  转为 registeredResourceClass 的对应的 decoder 的 resourceClass 集合 ，有可能有多个
         List<ResourceDecoder<Data, TResource>> decoders =
             decoderRegistry.getDecoders(dataClass, registeredResourceClass);
-        //获取registeredResourceClass和registeredTranscodeClasss对应的所有ResourceTranscoder
+        //获取所有 可以将 registeredResourceClass 转为 registeredTranscodeClass 的对应的 transcoder 的 transcodeClass 集合
         ResourceTranscoder<TResource, Transcode> transcoder =
             transcoderRegistry.get(registeredResourceClass, registeredTranscodeClass);
         @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
         //创建DecodePath,把相关信息封装
-        DecodePath<Data, TResource, Transcode> path =
+            DecodePath<Data, TResource, Transcode> path =
             new DecodePath<>(dataClass, registeredResourceClass, registeredTranscodeClass,
                 decoders, transcoder, throwableListPool);
         //添加进集合
         decodePaths.add(path);
       }
     }
+    Log.e("Registry","decodePaths="+decodePaths);
     //返回集合
     return decodePaths;
   }

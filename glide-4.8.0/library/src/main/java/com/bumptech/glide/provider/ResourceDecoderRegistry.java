@@ -56,6 +56,9 @@ public class ResourceDecoderRegistry {
     return result;
   }
 
+  /**
+   * 获取到 所有可以将  dataClass 转为 resourceClass 的 decoder
+   */
   @NonNull
   @SuppressWarnings("unchecked")
   public synchronized <T, R> List<Class<R>> getResourceClasses(@NonNull Class<T> dataClass,
@@ -76,9 +79,11 @@ public class ResourceDecoderRegistry {
     return result;
   }
 
+  //添加一个 可以将 dataClass 转为 resourceClass 的解码器
   public synchronized <T, R> void append(@NonNull String bucket,
       @NonNull ResourceDecoder<T, R> decoder,
       @NonNull Class<T> dataClass, @NonNull Class<R> resourceClass) {
+    //从桶中拿到有序列表 然后将这个解码器 封装成一个 Entry 加入到列表中
     getOrAddEntryList(bucket).add(new Entry<>(dataClass, resourceClass, decoder));
   }
 
@@ -103,9 +108,9 @@ public class ResourceDecoderRegistry {
   }
 
   private static class Entry<T, R> {
-    private final Class<T> dataClass;
-    @Synthetic final Class<R> resourceClass;
-    @Synthetic final ResourceDecoder<T, R> decoder;
+    private final Class<T> dataClass;//输入类型
+    @Synthetic final Class<R> resourceClass;//输出类型
+    @Synthetic final ResourceDecoder<T, R> decoder;//具体的操作类
 
     public Entry(@NonNull Class<T> dataClass, @NonNull Class<R> resourceClass,
         ResourceDecoder<T, R> decoder) {

@@ -28,10 +28,14 @@ public class DecodePath<DataType, ResourceType, Transcode> {
   private final Pool<List<Throwable>> listPool;
   private final String failureMessage;
 
-  public DecodePath(Class<DataType> dataClass, Class<ResourceType> resourceClass,
-      Class<Transcode> transcodeClass,
-      List<? extends ResourceDecoder<DataType, ResourceType>> decoders,
-      ResourceTranscoder<ResourceType, Transcode> transcoder, Pool<List<Throwable>> listPool) {
+  public DecodePath(
+      Class<DataType> dataClass, //原始数据类型
+      Class<ResourceType> resourceClass,// 需要的资源类型
+      Class<Transcode> transcodeClass,//需要转换到的资源类型
+      List<? extends ResourceDecoder<DataType, ResourceType>> decoders,// 需要用到的解码器
+      ResourceTranscoder<ResourceType, Transcode> transcoder, //需要用到的转换器
+      Pool<List<Throwable>> listPool
+  ) {
     this.dataClass = dataClass;//对于加载网络图片来说 ByteBuffer
     this.decoders = decoders;//对于加载网络图片来说 ByteBufferBitmapDecoder
     this.transcoder = transcoder;//对于加载网络图片来说 BitmapDrawableTranscoder

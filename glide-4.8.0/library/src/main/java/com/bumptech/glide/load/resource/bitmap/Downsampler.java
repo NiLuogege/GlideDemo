@@ -36,6 +36,8 @@ import java.util.Set;
 
 /**
  * Downsamples, decodes, and rotates images according to their exif orientation.
+ *
+ * 用于图片的 解码 ，大小确认 和旋转
  */
 public final class Downsampler {
   static final String TAG = "Downsampler";
@@ -132,8 +134,11 @@ public final class Downsampler {
   private final List<ImageHeaderParser> parsers;
   private final HardwareConfigState hardwareConfigState = HardwareConfigState.getInstance();
 
-  public Downsampler(List<ImageHeaderParser> parsers, DisplayMetrics displayMetrics,
-      BitmapPool bitmapPool, ArrayPool byteArrayPool) {
+  public Downsampler(
+      List<ImageHeaderParser> parsers, //默认只有一个 就是 DefaultImageHeaderParser
+      DisplayMetrics displayMetrics,
+      BitmapPool bitmapPool,
+      ArrayPool byteArrayPool) {
     this.parsers = parsers;
     this.displayMetrics = Preconditions.checkNotNull(displayMetrics);
     this.bitmapPool = Preconditions.checkNotNull(bitmapPool);
@@ -242,6 +247,7 @@ public final class Downsampler {
     int targetWidth = requestedWidth == Target.SIZE_ORIGINAL ? sourceWidth : requestedWidth;
     int targetHeight = requestedHeight == Target.SIZE_ORIGINAL ? sourceHeight : requestedHeight;
 
+    //获取图片类型 GIF or PNG  or JPEG or WEBP or 其他
     ImageType imageType = ImageHeaderParserUtils.getType(parsers, is, byteArrayPool);
 
     //处理缩放
@@ -400,6 +406,7 @@ public final class Downsampler {
     // PNG - Always uses floor
     // JPEG - Always uses ceiling
     // Webp - Prior to N, always uses floor. At and after N, always uses round.
+    //对不同 类型的图片 宽高做处理
     options.inSampleSize = powerOfTwoSampleSize;
     int powerOfTwoWidth;
     int powerOfTwoHeight;
@@ -457,8 +464,8 @@ public final class Downsampler {
       options.inDensity = options.inTargetDensity = 0;
     }
 
-    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-      Log.v(TAG, "Calculate scaling"
+//    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+      Log.e(TAG, "Calculate scaling"
           + ", source: [" + sourceWidth + "x" + sourceHeight + "]"
           + ", target: [" + targetWidth + "x" + targetHeight + "]"
           + ", power of two scaled: [" + powerOfTwoWidth + "x" + powerOfTwoHeight + "]"
@@ -467,7 +474,7 @@ public final class Downsampler {
           + ", adjusted scale factor: " + adjustedScaleFactor
           + ", target density: " + options.inTargetDensity
           + ", density: " + options.inDensity);
-    }
+//    }
   }
 
   /**

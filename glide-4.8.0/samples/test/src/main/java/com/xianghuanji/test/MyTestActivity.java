@@ -50,8 +50,10 @@ public class MyTestActivity extends Activity {
         ImageView iv = findViewById(R.id.iv);
 
         RequestOptions sharedOptions = new RequestOptions()
-            .skipMemoryCache(true)
-            .diskCacheStrategy(DiskCacheStrategy.NONE);
+            .circleCrop();
+//        RequestOptions sharedOptions = new RequestOptions()
+//            .skipMemoryCache(true)
+//            .diskCacheStrategy(DiskCacheStrategy.NONE);
 
         Glide.with(MyTestActivity.this)
             .load("http://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png")

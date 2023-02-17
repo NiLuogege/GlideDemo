@@ -383,78 +383,120 @@ public class Glide implements ComponentCallbacks2 {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
       registry.register(new ExifInterfaceImageHeaderParser());
     }
-    //添加默认的 图片头解析器
+    //添加默认的 图片头解析器 ，这里会判断出 图片是什么类 PNR or GIR or WEBP 等待
     registry.register(new DefaultImageHeaderParser());
 
+    //registry.getImageHeaderParsers() 默认只有一个 就是 DefaultImageHeaderParser
+    //用于图片的 解码 ，大小确认 和旋转
     Downsampler downsampler = new Downsampler(registry.getImageHeaderParsers(),
         resources.getDisplayMetrics(), bitmapPool, arrayPool);
+
+    //registry.getImageHeaderParsers() 默认只有一个 就是 DefaultImageHeaderParser
+    //用于会将  ByteBuffer 转为 gif 的 解码器
     ByteBufferGifDecoder byteBufferGifDecoder =
         new ByteBufferGifDecoder(context, registry.getImageHeaderParsers(), bitmapPool, arrayPool);
+
+    //从视频中 解析出图片的 解码器， 这应该就是为啥 加载视频的话 默认显示第一帧的原因了
     ResourceDecoder<ParcelFileDescriptor, Bitmap> parcelFileDescriptorVideoDecoder =
         VideoDecoder.parcel(bitmapPool);
+
+    //用于会将  ByteBuffer 转为 Bitmap 的 解码器
     ByteBufferBitmapDecoder byteBufferBitmapDecoder = new ByteBufferBitmapDecoder(downsampler);
+
+    //用于会将  Stream 转为 Bitmap 的 解码器
     StreamBitmapDecoder streamBitmapDecoder = new StreamBitmapDecoder(downsampler, arrayPool);
+
+    //用于会将  android资源（这里指定已改是 资源文件or 本地资源 ） 转为 Bitmap 的 解码器
     ResourceDrawableDecoder resourceDrawableDecoder =
         new ResourceDrawableDecoder(context);
+
+    //用于将 android资源（这里指定已改是 资源文件or 本地资源 ）  加载成流的 ModelLoader
     ResourceLoader.StreamFactory resourceLoaderStreamFactory =
         new ResourceLoader.StreamFactory(resources);
+
+    //用于将  Uri  加载成流的 ModelLoader
     ResourceLoader.UriFactory resourceLoaderUriFactory =
         new ResourceLoader.UriFactory(resources);
+
+    //用于将  资源id  加载成ParcelFileDescriptor的 ModelLoader
     ResourceLoader.FileDescriptorFactory resourceLoaderFileDescriptorFactory =
         new ResourceLoader.FileDescriptorFactory(resources);
+
+    //用于将  资源id  加载成 AssetFileDescriptor 的 ModelLoader
     ResourceLoader.AssetFileDescriptorFactory resourceLoaderAssetFileDescriptorFactory =
         new ResourceLoader.AssetFileDescriptorFactory(resources);
+
+    //将Bitmap 写成文件的 编码器
     BitmapEncoder bitmapEncoder = new BitmapEncoder(arrayPool);
 
+    //将 Bitmap 转换为 byte数组 的 转换器
     BitmapBytesTranscoder bitmapBytesTranscoder = new BitmapBytesTranscoder();
+    //将 GifDrawable 转换为 byte数组 的 转换器
     GifDrawableBytesTranscoder gifDrawableBytesTranscoder = new GifDrawableBytesTranscoder();
 
+    //获取数据提供者是干嘛
     ContentResolver contentResolver = context.getContentResolver();
 
     registry
+        //将 ByteBuffer 写入文件的 编码器
         .append(ByteBuffer.class, new ByteBufferEncoder())
+        //将 InputStream 写入文件的 编码器
         .append(InputStream.class, new StreamEncoder(arrayPool))
         /* Bitmaps */
+        //将  ByteBuffer 转为 Bitmap 的 解码器
         .append(Registry.BUCKET_BITMAP, ByteBuffer.class, Bitmap.class, byteBufferBitmapDecoder)
+        //将  InputStream 转为 Bitmap 的 解码器
         .append(Registry.BUCKET_BITMAP, InputStream.class, Bitmap.class, streamBitmapDecoder)
+        //将  ParcelFileDescriptor 转为 Bitmap 的 解码器
         .append(
             Registry.BUCKET_BITMAP,
             ParcelFileDescriptor.class,
             Bitmap.class,
             parcelFileDescriptorVideoDecoder)
+        //将  AssetFileDescriptor 转为 Bitmap 的 解码器
         .append(
             Registry.BUCKET_BITMAP,
             AssetFileDescriptor.class,
             Bitmap.class,
             VideoDecoder.asset(bitmapPool))
+        //将 Bitmap 转为 Bitmap 的 ModelLoade 传入的一般是工厂类 具体工作一般是 DataFetcher 来干
         .append(Bitmap.class, Bitmap.class, UnitModelLoader.Factory.<Bitmap>getInstance())
+        //将  Bitmap 转为 Bitmap 的 解码器
         .append(
             Registry.BUCKET_BITMAP, Bitmap.class, Bitmap.class, new UnitBitmapDecoder())
+        //将Bitmap 写成文件的 编码器
         .append(Bitmap.class, bitmapEncoder)
         /* BitmapDrawables */
+        //将  ByteBuffer 转为 BitmapDrawable 的 解码器
         .append(
             Registry.BUCKET_BITMAP_DRAWABLE,
             ByteBuffer.class,
             BitmapDrawable.class,
             new BitmapDrawableDecoder<>(resources, byteBufferBitmapDecoder))
+        //将  InputStream 转为 BitmapDrawable 的 解码器
         .append(
             Registry.BUCKET_BITMAP_DRAWABLE,
             InputStream.class,
             BitmapDrawable.class,
             new BitmapDrawableDecoder<>(resources, streamBitmapDecoder))
+        //将  ParcelFileDescriptor 转为 BitmapDrawable 的 解码器
         .append(
             Registry.BUCKET_BITMAP_DRAWABLE,
             ParcelFileDescriptor.class,
             BitmapDrawable.class,
             new BitmapDrawableDecoder<>(resources, parcelFileDescriptorVideoDecoder))
+        //将 BitmapDrawable 写成文件的 编码器
         .append(BitmapDrawable.class, new BitmapDrawableEncoder(bitmapPool, bitmapEncoder))
         /* GIFs */
+        //将  InputStream 转为 GifDrawable 的 解码器
         .append(
             Registry.BUCKET_GIF,
             InputStream.class,
             GifDrawable.class,
             new StreamGifDecoder(registry.getImageHeaderParsers(), byteBufferGifDecoder, arrayPool))
+        //将  ByteBuffer 转为 GifDrawable 的 解码器
         .append(Registry.BUCKET_GIF, ByteBuffer.class, GifDrawable.class, byteBufferGifDecoder)
+        //将 GifDrawable 写成文件的 编码器
         .append(GifDrawable.class, new GifDrawableEncoder())
         /* GIF Frames */
         // Compilation with Gradle requires the type to be specified for UnitModelLoader here.
