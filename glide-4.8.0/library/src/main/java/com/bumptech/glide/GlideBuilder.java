@@ -384,17 +384,17 @@ public final class GlideBuilder {
 
   @NonNull
   Glide build(@NonNull Context context) {
-    //创建进行网络请求 拉取图片的线程池？
+    //创建进行网络请求 拉取图片的线程池 ,
     if (sourceExecutor == null) {
       sourceExecutor = GlideExecutor.newSourceExecutor();
     }
 
-    //创建磁盘缓存线程池？
+    //创建磁盘缓存线程池
     if (diskCacheExecutor == null) {
       diskCacheExecutor = GlideExecutor.newDiskCacheExecutor();
     }
 
-    //这个用于加载帧动画的线程池？是否包含 gif图片的解析?
+    //这个用于 gif图片的解析
     if (animationExecutor == null) {
       animationExecutor = GlideExecutor.newAnimationExecutor();
     }

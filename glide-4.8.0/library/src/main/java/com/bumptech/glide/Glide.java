@@ -279,7 +279,7 @@ public class Glide implements ComponentCallbacks2 {
       }
     }
 
-    //设置 RequestManager 工程类
+    //设置 RequestManager 工程类 ，默认为 null
     RequestManagerRetriever.RequestManagerFactory factory =
         annotationGeneratedModule != null
             ? annotationGeneratedModule.getRequestManagerFactory() : null;

@@ -22,6 +22,8 @@ final class RuntimeCompat {
 
   /**
    * Determines the number of cores available on the device.
+   *
+   * cpu 核心数
    */
   static int availableProcessors() {
     int cpus = Runtime.getRuntime().availableProcessors();
