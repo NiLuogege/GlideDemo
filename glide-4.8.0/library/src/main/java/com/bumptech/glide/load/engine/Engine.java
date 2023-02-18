@@ -200,7 +200,7 @@ public class Engine implements EngineJobListener,
       return null;
     }
 
-    //从内存缓存中获取 这个是 LruResourceCache
+    //从内存缓存中获取 这个是 LruResourceCache ,如果获取到了 会将 LruResourceCache 中的删掉 加入到 ActiveResources 中
     EngineResource<?> cached = loadFromCache(key, isMemoryCacheable);
     if (cached != null) {//找到了 直接调用 onResourceReady
       //cb 对象为 SingleRequest
