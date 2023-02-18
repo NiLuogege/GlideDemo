@@ -655,7 +655,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
       return target;
     }
 
-    //先取消之前的请求
+    //先取消之前未完成的请求
     requestManager.clear(target);
     //请求设置给 target ，asDrawable() 流程中 target 为 DrawableImageViewTarget
     target.setRequest(request);
@@ -994,6 +994,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
       Priority thumbPriority = thumbnailBuilder.requestOptions.isPrioritySet()
           ? thumbnailBuilder.requestOptions.getPriority() : getThumbnailPriority(priority);
 
+      //计算缩略图的大小
       int thumbOverrideWidth = thumbnailBuilder.requestOptions.getOverrideWidth();
       int thumbOverrideHeight = thumbnailBuilder.requestOptions.getOverrideHeight();
       if (Util.isValidDimensions(overrideWidth, overrideHeight)

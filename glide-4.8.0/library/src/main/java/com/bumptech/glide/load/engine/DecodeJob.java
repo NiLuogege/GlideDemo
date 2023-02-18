@@ -482,7 +482,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     //告诉回调 资源加载完成了
     notifyComplete(result, dataSource);
 
-    //
+    //重新设置 stage
     stage = Stage.ENCODE;
     try {
       //对于加载网络图片来说是 false 所以不进这个 if

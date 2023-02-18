@@ -26,6 +26,7 @@ public class RequestTracker {
   // side affects, WeakReferences are still essentially required. A user can always make repeated
   // requests into targets other than views, or use an activity manager in a fragment pager where
   // holding strong references would steadily leak bitmaps and/or views.
+  //保存了当前Activity总 未完成的所有请求
   private final Set<Request> requests =
       Collections.newSetFromMap(new WeakHashMap<Request, Boolean>());
   // A set of requests that have not completed and are queued to be run again. We use this list to
