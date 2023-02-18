@@ -332,7 +332,7 @@ public class Engine implements EngineJobListener,
     Util.assertMainThread();
     // A null resource indicates that the load failed, usually due to an exception.
     if (resource != null) {
-      //有添加监听为Engine 类
+      //又添加监听为Engine 类
       resource.setResourceListener(key, this);
 
       //一般是true
@@ -342,7 +342,7 @@ public class Engine implements EngineJobListener,
         activeResources.activate(key, resource);
       }
     }
-    //移除缓存的 engineJob
+    //加载完毕了 移除缓存的 engineJob
     jobs.removeIfCurrent(key, engineJob);
   }
 
