@@ -25,10 +25,13 @@ import java.util.concurrent.TimeUnit;
  * - 没有命中内存缓存(LruResourceCache) ，会在图片加载变换完成后  给 ActiveResources 中添加一份 代码位置是在 Engine.onEngineJobComplete
  * <p>
  * 移除缓存的话只有一种情况
- * -在 对应的 EngineResource 没有一个被引用者的时候（其实就是对应的资源被替换or销毁的时候）会被移除 代码位置是在 EngineResource.release
+ * -在 对应的 EngineResource 没有一个被引用者的时候（其实就是对应的资源被替换or销毁的时候）会被移除，移除以后会被添加到LruResourceCache 中
+ *  代码位置是在 EngineResource.release
  * <p>
  * <p>
- * 这个缓存可以说是 第一级内存缓存，这个缓存中存储的是当前正在显示（使用）的资源
+ * 这个缓存可以说是 第一级内存缓存，这个缓存中存储的是当前正在显示（使用）的资源 ， 这一级缓存存在的意义是
+ * 为了缓解 LruResourceCache 的内存压力，而且提高效率，因为 LruResourceCache在存的时候要计算内存大小，
+ * 删的时候也需要重新计算大小 ，所以效率还是没有 直接使用Map这种key - value这种形式来的高。
  */
 final class ActiveResources {
   private static final int MSG_CLEAN_REF = 1;
@@ -46,6 +49,8 @@ final class ActiveResources {
   });
 
   //最近使用资源远程，一个 key（EngineKey） 和 弱引用的资源 映射表
+  //这里之所以使用弱引用主要是因为 如果这个资源正在被显示那就是 被系统强引用着，不会被回收，当不被引用是才会被回收，
+  // 反而使用软引用 会导致内存浪费的问题
   @VisibleForTesting final Map<Key, ResourceWeakReference> activeEngineResources = new HashMap<>();
 
   private ResourceListener listener;
